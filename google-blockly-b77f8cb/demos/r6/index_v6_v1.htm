@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>R6 Service Configuration</title>
+  <script src="../../blockly_compressed.js"></script>
+  <script src="../../blocks_compressed.js"></script>
+  <script src="../../javascript_compressed.js"></script>
+  <script src="../../msg/js/en.js"></script>
+  <script src="../blockfactory/app_controller.js"></script>
+  <script src="../blockfactory/factory_utils.js"></script>
+
+  <style>
+    body {
+      background-color: #fff;
+      font-family: sans-serif;
+    }
+    h1 {
+      font-weight: normal;
+      font-size: 140%;
+    }
+  </style>
+</head>
+<body>
+  <h1>R6 Service Configuration</a>
+
+  <p>
+    <button onclick="showCode()">Save R6 service config XML</button>
+    <button onclick="runCode()">Save Block config</button>
+    <button onclick="loadXML()">Load Block config</button>
+	<button onclick="loadXMLTemplate()">Load Template config</button>
+	
+	<input type="file" id="fileInput">
+  </p>
+
+  <div id="blocklyDiv" style="height: 600px; width: 1500px;"></div>
+
+  <xml id="toolbox" style="display: none">
+
+	<category name="Mediation">
+      <block type="math_number_property"></block>
+      <block type="mediationevent"></block>
+      <block type="mediationfeed"></block>
+      <block type="mediationreference"></block>
+    </category>
+	<category name="Services">
+      <block type="serviceconfiguration"></block>
+      <block type="servicespecification"></block>
+      <block type="servicespecificationcharacteristic"></block>
+      <block type="servicespecificationcharacteristicvalue"></block>
+      <block type="subservice"></block>
+	  <block type="serviceAction"></block>
+    </category>
+  </xml>
+
+  <xml id="startBlocks" style="display: none">
+
+  </xml>
+
+  <script>
+
+
+    var workspace = Blockly.inject('blocklyDiv',
+        {media: '../../media/',
+        zoom: {controls: true, wheel: true},
+         toolbox: document.getElementById('toolbox')});
+
+    Blockly.Xml.domToWorkspace(document.getElementById('startBlocks'),
+                               workspace);
+
+// Mediation Event block
+Blockly.Blocks['mediationevent'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("mediationEvent")
+        .appendField(new Blockly.FieldTextInput("Name"), "mediationEventName")
+        .appendField(new Blockly.FieldTextInput("Description"), "mediationEventDescription");
+    this.setPreviousStatement(true, "mediationEvent");
+    this.setNextStatement(true, "mediationEvent");
+    this.setColour(60);
+    this.setTooltip('');
+    this.setHelpUrl('http://www.example.com/');
+  }
+};
+
+Blockly.Blocks['serviceAction'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("Service Provisioning Type")
+        .appendField(new Blockly.FieldDropdown([["New","NEW"], ["Terminate","TERMINATE"], ["Update","UPDATE_SERVICE_FEATURES"]]), "serviceProvisioningTypeKey");
+    this.appendDummyInput()
+        .appendField("workflow Definition Name")
+        .appendField(new Blockly.FieldDropdown([["BT Default Provision","bt-compute-provision-default-service"], ["BT Default Terminate","bt-compute-terminate-default-service"], ["BT Default Update","bt-compute-provision-default-service"]]), "WorkflowDefinitionName");
+    this.setPreviousStatement(true, "serviceAction");
+    this.setNextStatement(true, "serviceAction");
+    this.setColour(230);
+    this.setTooltip('');
+    this.setHelpUrl('');
+  }
+};
+
+Blockly.Blocks['mediationfeed'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("MediationFeed")
+        .appendField(new Blockly.FieldTextInput("key"), "mediationFeedKey", "MediationFeedKey_")
+        .appendField(new Blockly.FieldTextInput("description"), "mediationFeedDescription")
+        .appendField(new Blockly.FieldTextInput("timeZone"), "mediationFeedtimeZone");
+    this.appendStatementInput("mediationEvents")
+        .setCheck("mediationEvent");
+    this.setPreviousStatement(true, "MediationFeed");
+    this.setNextStatement(true, "MediationFeed");
+    this.setColour(160);
+    this.setTooltip('');
+    this.setHelpUrl('http://www.example.com/');
+  }
+};
+
+Blockly.Blocks['serviceconfiguration'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("ServiceConfiguration");
+    this.appendStatementInput("serviceSpecifications")
+        .setCheck("ServiceSpecification")
+        .appendField("ServiceSpecifications");
+    this.appendStatementInput("MediationFeeds")
+        .setCheck("MediationFeed")
+        .appendField("MediationFeeds");
+    this.setColour(210);
+    this.setTooltip('');
+    this.setHelpUrl('http://www.example.com/');
+  }
+};
+
+Blockly.Blocks['servicespecification'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("ServiceSpecification")
+        .appendField(new Blockly.FieldTextInput("Key"), "ServiceSpecificationKey");
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldTextInput("Description"), "ServiceSpecificationDescription");
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldTextInput("DisplayName"), "ServiceSpecificationDisplayName");
+    this.appendDummyInput()
+		.appendField(new Blockly.FieldTextInput("2016-11-11"), "ServiceSpecificationActivationDate");
+    this.appendStatementInput("serviceSpecificationCharacteristics")
+        .setCheck("ServiceSpecificationCharacteristic")
+        .appendField("Characteristics");
+    this.appendStatementInput("subServices")
+        .setCheck("subService")
+        .appendField("SubServices");
+    this.appendStatementInput("MediationReferences")
+        .setCheck("MediationReference")
+        .appendField("MediationReferences");
+	this.appendStatementInput("serviceActions")
+        .setCheck("serviceAction")
+        .appendField("serviceActions");
+	
+    this.setPreviousStatement(true, "ServiceSpecification");
+    this.setNextStatement(true, "ServiceSpecification");
+    this.setColour(260);
+    this.setTooltip('');
+    this.setHelpUrl('http://www.example.com/');
+  }
+};
+
+Blockly.Blocks['servicespecificationcharacteristic'] = {
+  init: function() {
+  	
+
+   this.appendDummyInput()
+   .appendField("Characteristic") 
+    
+    var dropdown = new Blockly.FieldDropdown([["selection list", "SELECT"], ["phone number", "PHONE_NUMBER"], ["boolean", "BOOLEAN"], ["none", "NONE"], ["string", "STRING"], ["number", "NUMBER"]], function(option) {
+      var characteristicValuesRequired = (option == 'SELECT');
+      this.sourceBlock_.updateShape_(characteristicValuesRequired);
+	  });
+    this.appendDummyInput()
+        .appendField("Key")
+        .appendField(new Blockly.FieldTextInput("key"), "CharacteristicKey")  //could be a guid or blockly id?
+		.appendField("DisplayName")
+        .appendField(new Blockly.FieldTextInput("key"), "CharacteristicDisplayName")
+		.appendField("DisplayOrder")
+	
+
+
+
+  
+		//.appendField(new Blockly.FieldNumber(myindex), "CharacteristicDisplayOrder")
+  
+		.appendField(new Blockly.FieldNumber(0, 0), "CharacteristicDisplayOrder")
+		//.setEditable(false) not this
+		
+		.appendField("Description")
+        .appendField(new Blockly.FieldTextInput("key"), "CharacteristicDescription")
+			
+        .appendField("type")
+        //.appendField(new Blockly.FieldDropdown([["selection list", "SELECT"], ["phone number", "PHONE_NUMBER"], ["boolean", "BOOLEAN"], ["none", "NONE"], ["string", "STRING"], ["number", "NUMBER"]]), "CharacteristicType");
+	
+      .appendField(dropdown,"CharacteristicType");
+
+
+    this.appendDummyInput()
+        .appendField("Hidden")
+        .appendField(new Blockly.FieldCheckbox("FALSE"), "isHidden")
+        .appendField("ReadOnly")
+        .appendField(new Blockly.FieldCheckbox("FALSE"), "isReadOnly")
+        .appendField("Mandatory")
+        .appendField(new Blockly.FieldCheckbox("FALSE"), "isMandatory")
+        .appendField("DefaultActive")
+        .appendField(new Blockly.FieldCheckbox("FALSE"), "isDefaultActive")
+        .appendField("Changable")
+        .appendField(new Blockly.FieldCheckbox("FALSE"), "isChangable")
+        .appendField("ServiceIdentifier")
+        .appendField(new Blockly.FieldCheckbox("FALSE"), "isServiceIdentifier");
+    this.appendDummyInput()
+        .appendField("ChangeableDuringProvisioning")
+        .appendField(new Blockly.FieldCheckbox("FALSE"), "isChangeableDuringProvisioning")
+        .appendField("GroupIdentifier")
+        .appendField(new Blockly.FieldCheckbox("FALSE"), "isGroupIdentifier")
+        .appendField("Searchable")
+        .appendField(new Blockly.FieldCheckbox("FALSE"), "isSearchable")
+        .appendField("ServiceAddress")
+        .appendField(new Blockly.FieldCheckbox("FALSE"), "isServiceAddress")
+        .appendField("DeliveryAddress")
+        .appendField(new Blockly.FieldCheckbox("FALSE"), "isDeliveryAddress");
+    this.appendStatementInput("ServiceSpecificationCharacteristicValues")
+        .setCheck("ServiceSpecificationCharacteristicValue")
+        .appendField("Values:");
+    this.setPreviousStatement(true, "ServiceSpecificationCharacteristic");
+    this.setNextStatement(true, "ServiceSpecificationCharacteristic");
+    this.setColour(330);
+    this.setTooltip('');
+    this.setHelpUrl('http://www.example.com/');
+    },
+    /**
+     * Create XML to represent whether the 'divisorInput' should be present.
+     * @return {Element} XML storage element.
+     * @this Blockly.Block
+     */
+    mutationToDom: function() {
+      var container = document.createElement('mutation');
+      var characteristicValueRequired = (this.getFieldValue('CharacteristicType') == 'selectionlist');
+      container.setAttribute('characteristicValueRequired', characteristicValueRequired);
+	  
+	   //var characteristicValueRequired = (this.getFieldValue('CharacteristicType') == 'NUMBER');
+      //container.setAttribute('validationErrorMessage', characteristicValueRequired);
+	  
+      return container;
+    },
+    /**
+     * Parse XML to restore the 'divisorInput'.
+     * @param {!Element} xmlElement XML storage element.
+     * @this Blockly.Block
+     */
+    domToMutation: function(xmlElement) {
+      var characteristicValueRequired = (xmlElement.getAttribute('characteristicvaluerequired') == 'true');
+      this.updateShape_(characteristicValueRequired);
+    },
+
+
+  updateShape_: function(characteristicValuesRequired) {
+    // Add or remove a Statement Input.
+    var StatementExists = this.getInput('ServiceSpecificationCharacteristicValues');
+    if (characteristicValuesRequired) {
+      if (StatementExists) {
+        this.appendStatementInput("ServiceSpecificationCharacteristicValues")
+            .setCheck("ServiceSpecificationCharacteristicValue")
+            .appendField("Values:");
+      }
+    } else if (!StatementExists) {
+      this.removeInput("ServiceSpecificationCharacteristicValues");
+    }
+	
+  },
+  
+  onchange: function(changeEvent) {
+  
+  // need to make this only on move events??
+  var myid = this.id;
+	var myArray = workspace.getAllBlocks();
+	for(var i = 0; i < myArray.length; i++) {
+       if(myArray[i].id == myid) {
+          var myindex = i;
+       }
+   }
+   this.setFieldValue(myindex,'CharacteristicDisplayOrder');
+  
+	
+  }
+
+};
+
+Blockly.Blocks['math_number_property'] = {
+  /**
+   * Block for checking if a number is even, odd, prime, whole, positive,
+   * negative or if it is divisible by certain number.
+   * @this Blockly.Block
+   */
+  init: function() {
+    var PROPERTIES =
+        [[Blockly.Msg.MATH_IS_EVEN, 'EVEN'],
+         [Blockly.Msg.MATH_IS_ODD, 'ODD'],
+         [Blockly.Msg.MATH_IS_PRIME, 'PRIME'],
+         [Blockly.Msg.MATH_IS_WHOLE, 'WHOLE'],
+         [Blockly.Msg.MATH_IS_POSITIVE, 'POSITIVE'],
+         [Blockly.Msg.MATH_IS_NEGATIVE, 'NEGATIVE'],
+         [Blockly.Msg.MATH_IS_DIVISIBLE_BY, 'DIVISIBLE_BY']];
+    this.setColour(Blockly.Blocks.math.HUE);
+    this.appendValueInput('NUMBER_TO_CHECK')
+        .setCheck('Number');
+    var dropdown = new Blockly.FieldDropdown(PROPERTIES, function(option) {
+      var divisorInput = (option == 'DIVISIBLE_BY');
+      this.sourceBlock_.updateShape_(divisorInput);
+    });
+    this.appendDummyInput()
+        .appendField(dropdown, 'PROPERTY');
+    this.setInputsInline(false);
+    this.setOutput(true, 'Boolean');
+    this.setTooltip(Blockly.Msg.MATH_IS_TOOLTIP);
+  },
+  /**
+   * Create XML to represent whether the 'divisorInput' should be present.
+   * @return {Element} XML storage element.
+   * @this Blockly.Block
+   */
+  mutationToDom: function() {
+    var container = document.createElement('mutation');
+    var divisorInput = (this.getFieldValue('PROPERTY') == 'DIVISIBLE_BY');
+    container.setAttribute('divisor_input', divisorInput);
+    return container;
+  },
+  /**
+   * Parse XML to restore the 'divisorInput'.
+   * @param {!Element} xmlElement XML storage element.
+   * @this Blockly.Block
+   */
+  domToMutation: function(xmlElement) {
+    var divisorInput = (xmlElement.getAttribute('divisor_input') == 'true');
+    this.updateShape_(divisorInput);
+  },
+  /**
+   * Modify this block to have (or not have) an input for 'is divisible by'.
+   * @param {boolean} divisorInput True if this block has a divisor input.
+   * @private
+   * @this Blockly.Block
+   */
+  updateShape_: function(divisorInput) {
+    // Add or remove a Value Input.
+    var inputExists = this.getInput('DIVISOR');
+    if (divisorInput) {
+      if (!inputExists) {
+        this.appendValueInput('DIVISOR')
+            .setCheck('Number');
+      }
+    } else if (inputExists) {
+      this.removeInput('DIVISOR');
+    }
+  }
+};
+
+
+
+
+Blockly.Blocks['servicespecificationcharacteristicvalue'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("Value")
+        .appendField(new Blockly.FieldTextInput("key"), "CharacteristicValueKey")
+        .appendField("DisplayValue")
+        .appendField(new Blockly.FieldTextInput("displayValue"), "CharacteristicValueDisplayValue")
+        .appendField("DisplayOrder")
+        .appendField(new Blockly.FieldNumber(0, 0), "CharacteristicValueDisplayOrder")
+        .appendField("Description")
+        .appendField(new Blockly.FieldTextInput("description"), "CharacteristicValueDescription");
+    this.setInputsInline(true);
+    this.setPreviousStatement(true, "ServiceSpecificationCharacteristicValue");
+    this.setNextStatement(true, "ServiceSpecificationCharacteristicValue");
+    this.setColour(20);
+    this.setTooltip('');
+    this.setHelpUrl('http://www.example.com/');
+  },
+    onchange: function(changeEvent) {
+  
+  // need to make this only on move events?? and only for this block type?
+  var myid = this.id;
+	var myArray = workspace.getAllBlocks();
+	for(var i = 0; i < myArray.length; i++) {
+       if(myArray[i].id === myid) {
+          var myindex = i;
+       }
+   }
+   this.setFieldValue(myindex,'CharacteristicValueDisplayOrder');
+  
+	
+  }
+};
+
+Blockly.Blocks['mediationreference'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("MediationReference")
+        .appendField(new Blockly.FieldDropdown(getMediationFeeds), "MediationReference")
+        .appendField(new Blockly.FieldTextInput("Activation"), "MediationReferenceActivationDate")
+        .appendField(new Blockly.FieldTextInput("Termination"), "MediationReferenceTerminationDate");
+    this.setPreviousStatement(true, "MediationReference");
+    this.setNextStatement(true, "MediationReference");
+    this.setColour(160);
+    this.setTooltip('');
+    this.setHelpUrl('http://www.example.com/');
+  }
+};
+
+function getMediationFeeds() {
+  var options = [];
+  var now = Date.now();
+  var xml = Blockly.Xml.workspaceToDom(workspace);
+  var xml_text = Blockly.Xml.domToText(xml);
+  //alert(xml_text); //block[@type='mediationfeed']/field[@name='mediationFeedKey']/text()
+  var MediationFeedKeys = document.evaluate( "//block[@type='mediationfeed']/field[@name='mediationFeedKey']/text()", xml, null, XPathResult.ANY_TYPE, null );
+
+  options.push(['... select MediationFeed' , 'null']);
+
+  var curMediationFeedKey=MediationFeedKeys.iterateNext();
+  while (curMediationFeedKey) {
+    //alert(curMediationFeedKey.nodeValue);
+    options.push([curMediationFeedKey.nodeValue, curMediationFeedKey.nodeValue]);
+  	curMediationFeedKey=MediationFeedKeys.iterateNext();
+  }
+
+  return options;
+}
+
+Blockly.Blocks['subservice'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("SubService")
+        .appendField(new Blockly.FieldDropdown([["...select SubService", "...select"]]), "subServiceReference")
+        .appendField("NumOfInstances")
+        .appendField(new Blockly.FieldNumber(0, 0), "minNumOfInstances")
+        .appendField("-")
+        .appendField(new Blockly.FieldNumber(0, 0), "maxNumOfInstances")
+        .appendField("Activation")
+        .appendField(new Blockly.FieldTextInput("2016-11-11"), "subServiceActivation")
+        .appendField("Termination")
+        .appendField(new Blockly.FieldTextInput("4000-01-01"), "subServiceTerminiation");
+    this.setPreviousStatement(true, "subService");
+    this.setNextStatement(true, "subService");
+    this.setColour(290);
+    this.setTooltip('');
+    this.setHelpUrl('http://www.example.com/');
+  }
+};
+
+
+// Blocky stubs
+
+Blockly.JavaScript['serviceAction'] = function(block) {
+  var dropdown_serviceaction = block.getFieldValue('serviceProvisioningTypeKey');
+  var dropdown_workflowname = block.getFieldValue('WorkflowDefinitionName');
+ 
+  var code = '<serviceAction>\n';
+	code=code+'<serviceProvisioningTypeKey>'+dropdown_serviceaction+'</serviceProvisioningTypeKey>\n';
+    code=code+'<workflowDefinitionName workflowType="activiti">'+dropdown_workflowname+'</workflowDefinitionName>\n';
+  	code=code+'</serviceAction>\n';
+
+  return code;
+};
+
+Blockly.JavaScript['mediationevent'] = function(block) {
+  var text_mediationeventname = block.getFieldValue('mediationEventName');
+  var text_mediationeventdescription = block.getFieldValue('mediationEventDescription');
+
+  var code = '<mediationEvent>\n';
+  code=code+'<key>'+text_mediationeventname+'</key>\n';
+  code=code+'<description>'+text_mediationeventdescription+'</description>\n';
+  code=code+'</mediationEvent>\n';
+  return code;
+};
+
+Blockly.JavaScript['mediationfeed'] = function(block) {
+  var text_mediationfeedkey = block.getFieldValue('mediationFeedKey');
+  var text_mediationfeeddescription = block.getFieldValue('mediationFeedDescription');
+  var text_mediationfeedtimezone = block.getFieldValue('mediationFeedtimeZone');
+  var statements_mediationevents = Blockly.JavaScript.statementToCode(block, 'mediationEvents');
+
+  var code = '<mediationFeed>\n';
+  	code=code+'<key>'+text_mediationfeedkey+'</key>\n';
+  	code=code+'<description>'+text_mediationfeeddescription+'</description>\n';
+  	code=code+'<timeZone>'+text_mediationfeedtimezone+'</timeZone>\n';
+  	code=code+'<mediationEvents>\n'+statements_mediationevents+'</mediationEvents>\n';
+  	code=code+'</mediationFeed>\n';
+  return code;
+};
+
+Blockly.JavaScript['serviceconfiguration'] = function(block) {
+  var statements_servicespecifications = Blockly.JavaScript.statementToCode(block, 'serviceSpecifications');
+  var statements_mediationfeeds = Blockly.JavaScript.statementToCode(block, 'MediationFeeds');
+
+  var code = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<serviceConfiguration xmlns="http://www.infonova.com/product/model">\n'+'<serviceSpecifications>\n'+statements_servicespecifications+'</serviceSpecifications>\n<mediationFeeds>\n'+statements_mediationfeeds+'</mediationFeeds>\n</serviceConfiguration>\n';
+  return code;
+};
+
+Blockly.JavaScript['servicespecification'] = function(block) {
+  var text_servicespecificationkey = block.getFieldValue('ServiceSpecificationKey');
+  var text_servicespecificationdisplayname = block.getFieldValue('ServiceSpecificationDisplayName');
+  var text_servicespecificationdescription = block.getFieldValue('ServiceSpecificationDescription');
+  var text_servicespecificationactivationdate = block.getFieldValue('ServiceSpecificationActivationDate');
+  var text_servicespecificationterminationdate = block.getFieldValue('ServiceSpecificationTerminationDate');
+  var statements_servicespecifiactioncharacteristics = Blockly.JavaScript.statementToCode(block, 'serviceSpecifiactionCharacteristics');
+  var statements_subservices = Blockly.JavaScript.statementToCode(block, 'subServices');
+  var statements_mediationreferences = Blockly.JavaScript.statementToCode(block, 'MediationReferences');
+  var statements_serviceActions = Blockly.JavaScript.statementToCode(block,'serviceActions');
+
+  var code = '<serviceSpecification>\n';
+      code = code + '<key>'+text_servicespecificationkey+'</key>\n';
+      code = code + '<description>'+text_servicespecificationdescription+'</description>\n';
+      code = code + '<displayName>'+text_servicespecificationdisplayname+'</displayName>\n';
+      code = code + '<serviceSpecificationCharacteristics>\n'+statements_servicespecifiactioncharacteristics+'</serviceSpecificationCharacteristics>\n';
+      code = code + '<subServices>\n'+statements_subservices+'</subServices>\n';
+      code = code + '<mediationFeedReferences>\n'+statements_mediationreferences+'</mediationFeedReferences>\n';
+	  code = code + '<serviceActions>\n'+statements_serviceActions+'</serviceActions>\n';
+      code = code +'</serviceSpecification>\n';
+  return code;
+};
+
+Blockly.JavaScript['servicespecificationcharacteristic'] = function(block) {
+  var text_characteristickey = block.getFieldValue('CharacteristicKey');
+  var text_characteristicdisplayname = block.getFieldValue('CharacteristicDisplayName');
+  
+  var text_characteristicdisplayorder = block.getFieldValue('CharacteristicDisplayOrder');
+  var text_characteristicDescription = block.getFieldValue('CharacteristicDescription');
+  
+        
+  
+  var statements_servicespecificationcharacteristicvalues = Blockly.JavaScript.statementToCode(block, 'ServiceSpecificationCharacteristicValues');
+  var dropdown_characteristictype = block.getFieldValue('CharacteristicType');
+  var checkbox_ishidden = block.getFieldValue('isHidden') == 'TRUE';
+  var checkbox_isreadonly = block.getFieldValue('isReadOnly') == 'TRUE';
+  var checkbox_ismandatory = block.getFieldValue('isMandatory') == 'TRUE';
+  var checkbox_isdefaultactive = block.getFieldValue('isDefaultActive') == 'TRUE';
+  var checkbox_ischangable = block.getFieldValue('isChangable') == 'TRUE';
+  var checkbox_isserviceidentifier = block.getFieldValue('isServiceIdentifier') == 'TRUE';
+  var checkbox_ischangeableduringprovisioning = block.getFieldValue('isChangeableDuringProvisioning') == 'TRUE';
+  var checkbox_isgroupidentifier = block.getFieldValue('isGroupIdentifier') == 'TRUE';
+  var checkbox_issearchable = block.getFieldValue('isSearchable') == 'TRUE';
+  var checkbox_isserviceaddress = block.getFieldValue('isServiceAddress') == 'TRUE';
+  var checkbox_isdeliveryaddress = block.getFieldValue('isDeliveryAddress') == 'TRUE';
+
+  var code = '<serviceSpecificationCharacteristic ';
+  	code=code+'isHidden="'+checkbox_ishidden+'" ';
+  	code=code+'isReadOnly="'+checkbox_isreadonly+'" ';
+  	code=code+'isMandatory="'+checkbox_ismandatory+'" ';
+  	code=code+'isDefaultActive="'+checkbox_isdefaultactive+'" ';
+  	code=code+'isChangeable="'+checkbox_ischangable+'" ';
+  	code=code+'isServiceIdentifier="'+checkbox_isserviceidentifier+'" ';
+  	code=code+'isChangeableDuringProvisioning="'+checkbox_ischangeableduringprovisioning+'" ';
+  	code=code+'isGroupIdentifier="'+checkbox_isgroupidentifier+'" ';
+  	code=code+'isSearchable="'+checkbox_issearchable+'" ';
+  	code=code+'isServiceAddress="'+checkbox_isserviceaddress+'" ';
+  	code=code+'isDeliveryAddress="'+checkbox_isdeliveryaddress+'" ';
+  	code=code+'>\n';
+  	code=code+'<characteristicKey>'+text_characteristickey+'</characteristicKey>\n';
+  	code=code+'<characteristicTypeKey>'+dropdown_characteristictype+'</characteristicTypeKey>\n';
+  	code=code+'<displayName>'+text_characteristicdisplayname+'</displayName>\n';
+  	code=code+'<displayOrder>'+text_characteristicdisplayorder+'</displayOrder>\n';
+  code=code+'<description>'+text_characteristicDescription+'</description>\n';
+ 
+	code=code+'<serviceSpecificationCharacteristicValues>\n'+statements_servicespecificationcharacteristicvalues+'</serviceSpecificationCharacteristicValues>\n';
+  	code=code+'</serviceSpecificationCharacteristic>\n';
+  return code;
+};
+
+Blockly.JavaScript['mediationreference'] = function(block) {
+  var dropdown_mediationreference = block.getFieldValue('MediationReference');
+  var text_mediationreferenceactivationdate = block.getFieldValue('MediationReferenceActivationDate');
+  var text_mediationreferenceterminationdate = block.getFieldValue('MediationReferenceTerminationDate');
+
+  var code = '<mediationFeedReference>\n';
+  	code=code+'<mediationFeedKey>'+dropdown_mediationreference+'</mediationFeedKey>\n';
+  	code=code+'<activation>'+text_mediationreferenceactivationdate+'</activation>\n';
+  	code=code+'<termination>'+text_mediationreferenceterminationdate+'</termination>\n';
+  	code=code+'</mediationFeedReference>\n';
+  return code;
+};
+
+Blockly.JavaScript['servicespecificationcharacteristicvalue'] = function(block) {
+  var text_characteristicvaluekey = block.getFieldValue('CharacteristicValueKey');
+  var text_characteristicvaluedisplayvalue = block.getFieldValue('CharacteristicValueDisplayValue');
+  var text_characteristicvaluedisplayorder = block.getFieldValue('CharacteristicValueDisplayOrder');
+  var text_characteristicvaluedescription = block.getFieldValue('CharacteristicValueDescription');
+
+  var code = '<serviceSpecificationCharacteristicValue>\n';
+  	code=code+'<key>'+text_characteristicvaluekey+'</key>\n';
+  	code=code+'<displayName>'+text_characteristicvaluedisplayvalue+'</displayName>\n';
+  	code=code+'<displayOrder>'+text_characteristicvaluedisplayorder+'</displayOrder>\n';
+  	code=code+'<description>'+text_characteristicvaluedescription+'</description>\n';
+  	code=code+'</serviceSpecificationCharacteristicValue>\n';
+  return code;
+};
+
+Blockly.JavaScript['subservice'] = function(block) {
+  var dropdown_subservicereference = block.getFieldValue('subServiceReference');
+  var number_minnumofinstances = block.getFieldValue('minNumOfInstances');
+  var number_maxnumofinstances = block.getFieldValue('maxNumOfInstances');
+  var text_subserviceactivation = block.getFieldValue('subServiceActivation');
+  var text_subserviceterminiation = block.getFieldValue('subServiceTerminiation');
+
+  var code = '<subService>\n';
+  	code=code+'<serviceKey>'+dropdown_subservicereference+'</serviceKey>\n';
+  	code=code+'<minNumberOfInstances>'+number_minnumofinstances+'</minNumberOfInstances>\n';
+  	code=code+'<maxNumberOfInstances>'+number_maxnumofinstances+'</maxNumberOfInstances>\n';
+  	code=code+'<activation>'+number_maxnumofinstances+'</activation>\n';
+  	code=code+'<termination>'+number_maxnumofinstances+'</termination>\n';
+  	code=code+'</subService>\n';
+
+  return code;
+};
+
+    function showCode() {
+      // Generate XML code and display it.
+      Blockly.JavaScript.INFINITE_LOOP_TRAP = null;
+      var code = Blockly.JavaScript.workspaceToCode(workspace);
+      alert(code);
+      var filename = prompt('Enter the file name under which to save your R6 Service Configuration ' + 'library.', 'R6_SRV_Configuraion.xml');
+      // Download file if all necessary parameters are provided.
+      if (filename) {
+        FactoryUtils.createAndDownloadFile(code, filename, 'xml');
+      } else {
+        alert('Could not save Service Configuration without file name under which to ' + 'save library.');
+      }
+
+    }
+
+    function runCode() {
+      // Generate XML code and display it.
+	  var xml = Blockly.Xml.workspaceToDom(workspace);
+      var xml_text = Blockly.Xml.domToText(xml);
+      alert(xml_text);
+	   var filename = fileInput.files[0].name;
+	//if (filename = '') {
+	   var filename = prompt('Enter the file name under which to save your R6 Service Configuration ' + 'library.', 'R6 Blocky.xml');
+	//}
+      // Download file if all necessary parameters are provided.
+      if (filename) {
+        FactoryUtils.createAndDownloadFile(xml_text, filename, 'xml');
+      } else {
+        alert('Could not save Service Configuration without file name under which to ' + 'save library.');
+      }
+	  
+    }
+
+    function loadXML() {
+	
+	
+	// var input = document.getElementById('startBlocks');
+      //var xml_text = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><xml xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:fn=\"http://www.w3.org/2005/xpath-functions\" xmlns:R6=\"http://www.infonova.com/product/model\"><block xmlns=\"\" type=\"serviceconfiguration\" x=\"69\" y=\"20\"><statement name=\"serviceSpecifications\"><block type=\"servicespecification\"><field name=\"ServiceSpecificationKey\">MOBILE</field><field name=\"ServiceSpecificationDescription\">Mobile Service</field><field name=\"ServiceSpecificationDisplayName\">Mobile2</field><field name=\"ServiceSpecificationActivationDate\"/></block></statement></block></xml>";
+      //var xml_text2 ="<xml xmlns=\"http://www.w3.org/1999/xhtml\"><block type=\"serviceconfiguration\" id=\"vV6aZm{[/%*i+,;k+6|y\" x=\"69\" y=\"20\"><statement name=\"serviceSpecifications\"><block type=\"servicespecification\" id=\"FY:gs/36~SIVv|1rWP4T\"><field name=\"ServiceSpecificationKey\">MOBILE</field><field name=\"ServiceSpecificationDescription\">Mobile Service</field><field name=\"ServiceSpecificationDisplayName\">Mobile2</field><field name=\"ServiceSpecificationActivationDate\"></field><statement name=\"serviceSpecificationCharacteristics\"><block type=\"servicespecificationcharacteristic\" id=\"DQ^.EsUz_5h#3dVLeW*#\"><mutation characteristicvaluerequired=\"false\"></mutation><field name=\"CharacteristicKey\">MOBILE_BARRING</field><field name=\"CharacteristicDisplayName\">Barring</field><field name=\"CharacteristicType\">SELECT</field><field name=\"isHidden\">FALSE</field><field name=\"isReadOnly\">FALSE</field><field name=\"isMandatory\">FALSE</field><field name=\"isDefaultActive\">FALSE</field><field name=\"isChangable\">FALSE</field><field name=\"isServiceIdentifier\">FALSE</field><field name=\"isChangeableDuringProvisioning\">FALSE</field><field name=\"isGroupIdentifier\">FALSE</field><field name=\"isSearchable\">FALSE</field><field name=\"isServiceAddress\">FALSE</field><field name=\"isDeliveryAddress\">FALSE</field><statement name=\"ServiceSpecificationCharacteristicValues\"><block type=\"servicespecificationcharacteristicvalue\" id=\"7;+L3~w_},#K6WnnPIXM\"><field name=\"CharacteristicValueKey\">value1</field><field name=\"CharacteristicValueDisplayValue\">displayValue1</field><field name=\"CharacteristicValueDisplayOrder\">0</field><field name=\"CharacteristicValueDescription\">description1</field><next><block type=\"servicespecificationcharacteristicvalue\" id=\",[nd]WV@ZhzcU^un|:G)\"><field name=\"CharacteristicValueKey\">value2</field><field name=\"CharacteristicValueDisplayValue\">displayValue2</field><field name=\"CharacteristicValueDisplayOrder\">1</field><field name=\"CharacteristicValueDescription\">description2</field></block></next></block></statement><next><block type=\"servicespecificationcharacteristic\" id=\"Uz#sET65{L65Q9kAC)Zo\"><mutation characteristicvaluerequired=\"false\"></mutation><field name=\"CharacteristicKey\">MOBILE_BARRING</field><field name=\"CharacteristicDisplayName\">Barring</field><field name=\"CharacteristicType\">SELECT</field><field name=\"isHidden\">FALSE</field><field name=\"isReadOnly\">FALSE</field><field name=\"isMandatory\">FALSE</field><field name=\"isDefaultActive\">FALSE</field><field name=\"isChangable\">FALSE</field><field name=\"isServiceIdentifier\">FALSE</field><field name=\"isChangeableDuringProvisioning\">FALSE</field><field name=\"isGroupIdentifier\">FALSE</field><field name=\"isSearchable\">FALSE</field><field name=\"isServiceAddress\">FALSE</field><field name=\"isDeliveryAddress\">FALSE</field><comment pinned=\"false\" h=\"80\" w=\"160\">This is a comment</comment></block></next></block></statement></block></statement></block></xml>";
+      //var xml = Blockly.Xml.textToDom(xml_text2);
+      //Blockly.Xml.domToWorkspace(xml, workspace);
+	  
+	  // blank service
+	  //<xml xmlns="http://www.w3.org/1999/xhtml"><block type="serviceconfiguration" id="7ugj`)xWQVN*jRxlyCGR" x="1" y="5"><statement name="serviceSpecifications"><block type="servicespecification" id="91GbIewsM=^$I4pHRdas"><field name="ServiceSpecificationKey">Key</field><field name="ServiceSpecificationDescription">Description</field><field name="ServiceSpecificationDisplayName">DisplayName</field><field name="ServiceSpecificationActivationDate">2016-11-11</field><statement name="serviceSpecificationCharacteristics"><block type="servicespecificationcharacteristic" id="JQ1NIHuK3K(2i{w9H(Yh"><mutation characteristicvaluerequired="false"></mutation><field name="CharacteristicKey">key</field><field name="CharacteristicDisplayName">key</field><field name="CharacteristicType">SELECT</field><field name="isHidden">FALSE</field><field name="isReadOnly">FALSE</field><field name="isMandatory">FALSE</field><field name="isDefaultActive">FALSE</field><field name="isChangable">FALSE</field><field name="isServiceIdentifier">FALSE</field><field name="isChangeableDuringProvisioning">FALSE</field><field name="isGroupIdentifier">FALSE</field><field name="isSearchable">FALSE</field><field name="isServiceAddress">FALSE</field><field name="isDeliveryAddress">FALSE</field></block></statement><statement name="serviceActions"><block type="serviceAction" id="@b.BOZ3~G$M1IdKYq|Mk"><field name="serviceProvisioningTypeKey">NEW</field><field name="WorkflowDefinitionName">bt-compute-provision-default-service</field><next><block type="serviceAction" id=";.tFF]?1Z,rYG8F[N^3b"><field name="serviceProvisioningTypeKey">TERMINATE</field><field name="WorkflowDefinitionName">bt-compute-terminate-default-service</field><next><block type="serviceAction" id="Kx/K:(@a|MsM/:VTVeO4"><field name="serviceProvisioningTypeKey">UPDATE_SERVICE_FEATURES</field><field name="WorkflowDefinitionName">bt-compute-provision-default-service</field></block></next></block></next></block></statement></block></statement></block></xml>
+	  
+	  var xmlFile = fileInput.files[0];
+	
+	
+	var reader = new FileReader();
+reader.onload = function(e) {
+    // e.target.result should contain the text
+	  var xml = Blockly.Xml.textToDom(e.target.result);
+	  //alert(xml);
+      Blockly.Xml.domToWorkspace(xml, workspace);
+	 
+	};
+reader.readAsText(xmlFile);
+	
+	  
+	  //var code = Blockly.JavaScript.workspaceToCode(workspace);
+    }
+	
+	function loadXMLTemplate() {
+	
+	var xml_test = '<xml xmlns="http://www.w3.org/1999/xhtml"><block type="serviceconfiguration" id="7ugj`)xWQVN*jRxlyCGR" x="1" y="5"><statement name="serviceSpecifications"><block type="servicespecification" id="91GbIewsM=^$I4pHRdas"><field name="ServiceSpecificationKey">Key</field><field name="ServiceSpecificationDescription">Description</field><field name="ServiceSpecificationDisplayName">DisplayName</field><field name="ServiceSpecificationActivationDate">2016-11-11</field><statement name="serviceSpecificationCharacteristics"><block type="servicespecificationcharacteristic" id="JQ1NIHuK3K(2i{w9H(Yh"><mutation characteristicvaluerequired="false"></mutation><field name="CharacteristicKey">key</field><field name="CharacteristicDisplayName">key</field><field name="CharacteristicType">SELECT</field><field name="isHidden">FALSE</field><field name="isReadOnly">FALSE</field><field name="isMandatory">FALSE</field><field name="isDefaultActive">FALSE</field><field name="isChangable">FALSE</field><field name="isServiceIdentifier">FALSE</field><field name="isChangeableDuringProvisioning">FALSE</field><field name="isGroupIdentifier">FALSE</field><field name="isSearchable">FALSE</field><field name="isServiceAddress">FALSE</field><field name="isDeliveryAddress">FALSE</field></block></statement><statement name="serviceActions"><block type="serviceAction" id="@b.BOZ3~G$M1IdKYq|Mk"><field name="serviceProvisioningTypeKey">NEW</field><field name="WorkflowDefinitionName">bt-compute-provision-default-service</field><next><block type="serviceAction" id=";.tFF]?1Z,rYG8F[N^3b"><field name="serviceProvisioningTypeKey">TERMINATE</field><field name="WorkflowDefinitionName">bt-compute-terminate-default-service</field><next><block type="serviceAction" id="Kx/K:(@a|MsM/:VTVeO4"><field name="serviceProvisioningTypeKey">UPDATE_SERVICE_FEATURES</field><field name="WorkflowDefinitionName">bt-compute-provision-default-service</field></block></next></block></next></block></statement></block></statement></block></xml>';
+	var xml = Blockly.Xml.textToDom(xml_test);
+	  //alert(xml);
+      Blockly.Xml.domToWorkspace(xml, workspace);
+	 
+	  
+	
+	
+	}
+  </script>
+
+</body>
+</html>

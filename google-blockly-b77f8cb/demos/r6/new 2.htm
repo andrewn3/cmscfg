@@ -1,0 +1,1809 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>R6 Service Configuration</title>
+  <script src="../../blockly_compressed.js"></script>
+  <script src="../../blocks_compressed.js"></script>
+  <script src="../../javascript_compressed.js"></script>
+  <script src="../../msg/js/en.js"></script>
+  <script src="../blockfactory/app_controller.js"></script>
+  <script src="../blockfactory/factory_utils.js"></script>
+
+  <style>
+    body {
+      background-color: #fff;
+      font-family: sans-serif;
+    }
+    h1 {
+      font-weight: normal;
+      font-size: 140%;
+    }
+  </style>
+</head>
+<body>
+  <h1>R6 Service Configuration</a>
+
+  <p>
+    <button onclick="showCode()">Show R6 service config XML</button>
+    <button onclick="runCode()">Run JavaScript</button>
+    <button onclick="loadXML()">Load XML</button>
+  </p>
+
+  <div id="blocklyDiv" style="height: 600px; width: 1500px;"></div>
+
+  <xml id="toolbox" style="display: none">
+
+	<category name="Mediation">
+      <block type="math_number_property"></block>
+      <block type="mediationevent"></block>
+      <block type="mediationfeed"></block>
+      <block type="mediationreference"></block>
+    </category>
+	<category name="Services">
+      <block type="serviceconfiguration"></block>
+      <block type="servicespecification"></block>
+      <block type="servicespecificationcharacteristic"></block>
+      <block type="servicespecificationcharacteristicvalue"></block>
+      <block type="subservice"></block>
+    </category>
+  </xml>
+
+  <xml id="startBlocks" style="display: none">
+
+  </xml>
+
+  <script>
+
+
+    var workspace = Blockly.inject('blocklyDiv',
+        {media: '../../media/',
+        zoom: {controls: true, wheel: true},
+         toolbox: document.getElementById('toolbox')});
+
+    Blockly.Xml.domToWorkspace(document.getElementById('startBlocks'),
+                               workspace);
+
+    Blockly.Blocks['mediationevent'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("mediationEvent")
+        .appendField(new Blockly.FieldTextInput("Name"), "mediationEventName")
+        .appendField(new Blockly.FieldTextInput("Description"), "mediationEventDescription");
+    this.setPreviousStatement(true, "mediationEvent");
+    this.setNextStatement(true, "mediationEvent");
+    this.setColour(60);
+    this.setTooltip('');
+    this.setHelpUrl('http://www.example.com/');
+  }
+};
+
+Blockly.Blocks['mediationfeed'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("MediationFeed")
+        .appendField(new Blockly.FieldTextInput("key"), "mediationFeedKey", "MediationFeedKey_")
+        .appendField(new Blockly.FieldTextInput("description"), "mediationFeedDescription")
+        .appendField(new Blockly.FieldTextInput("timeZone"), "mediationFeedtimeZone");
+    this.appendStatementInput("mediationEvents")
+        .setCheck("mediationEvent");
+    this.setPreviousStatement(true, "MediationFeed");
+    this.setNextStatement(true, "MediationFeed");
+    this.setColour(160);
+    this.setTooltip('');
+    this.setHelpUrl('http://www.example.com/');
+  }
+};
+
+Blockly.Blocks['serviceconfiguration'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("ServiceConfiguration");
+    this.appendStatementInput("serviceSpecifications")
+        .setCheck("ServiceSpecification")
+        .appendField("ServiceSpecifications");
+    this.appendStatementInput("MediationFeeds")
+        .setCheck("MediationFeed")
+        .appendField("MediationFeeds");
+    this.setColour(210);
+    this.setTooltip('');
+    this.setHelpUrl('http://www.example.com/');
+  }
+};
+
+Blockly.Blocks['servicespecification'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("ServiceSpecification")
+        .appendField(new Blockly.FieldTextInput("Key"), "ServiceSpecificationKey");
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldTextInput("Description"), "ServiceSpecificationDescription");
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldTextInput("DisplayName"), "ServiceSpecificationDisplayName");
+    this.appendDummyInput()
+		.appendField(new Blockly.FieldTextInput("2016-11-11"), "ServiceSpecificationActivationDate");
+    this.appendStatementInput("serviceSpecificationCharacteristics")
+        .setCheck("ServiceSpecificationCharacteristic")
+        .appendField("Characteristics");
+    this.appendStatementInput("subServices")
+        .setCheck("subService")
+        .appendField("SubServices");
+    this.appendStatementInput("MediationReferences")
+        .setCheck("MediationReference")
+        .appendField("MediationReferences");
+    this.setPreviousStatement(true, "ServiceSpecification");
+    this.setNextStatement(true, "ServiceSpecification");
+    this.setColour(260);
+    this.setTooltip('');
+    this.setHelpUrl('http://www.example.com/');
+  }
+};
+
+Blockly.Blocks['servicespecificationcharacteristic'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("Characteristic");
+
+    var dropdown = new Blockly.FieldDropdown([["selection list", "SELECT"], ["phone number", "PHONE_NUMBER"], ["boolean", "BOOLEAN"], ["none", "NONE"], ["string", "STRING"], ["number", "NUMBER"]], function(option) {
+      var characteristicValuesRequired = (option == 'SELECT');
+      this.sourceBlock_.updateShape_(characteristicValuesRequired);
+	  });
+    this.appendDummyInput()
+        .appendField("Key")
+        .appendField(new Blockly.FieldTextInput("key"), "CharacteristicKey")
+        .appendField("DisplayName")
+        .appendField(new Blockly.FieldTextInput("key"), "CharacteristicDisplayName")
+        .appendField("type")
+        //.appendField(new Blockly.FieldDropdown([["selection list", "SELECT"], ["phone number", "PHONE_NUMBER"], ["boolean", "BOOLEAN"], ["none", "NONE"], ["string", "STRING"], ["number", "NUMBER"]]), "CharacteristicType");
+        .appendField(dropdown,"CharacteristicType");
+
+
+    this.appendDummyInput()
+        .appendField("Hidden")
+        .appendField(new Blockly.FieldCheckbox("FALSE"), "isHidden")
+        .appendField("ReadOnly")
+        .appendField(new Blockly.FieldCheckbox("FALSE"), "isReadOnly")
+        .appendField("Mandatory")
+        .appendField(new Blockly.FieldCheckbox("FALSE"), "isMandatory")
+        .appendField("DefaultActive")
+        .appendField(new Blockly.FieldCheckbox("FALSE"), "isDefaultActive")
+        .appendField("Changable")
+        .appendField(new Blockly.FieldCheckbox("FALSE"), "isChangable")
+        .appendField("ServiceIdentifier")
+        .appendField(new Blockly.FieldCheckbox("FALSE"), "isServiceIdentifier");
+    this.appendDummyInput()
+        .appendField("ChangeableDuringProvisioning")
+        .appendField(new Blockly.FieldCheckbox("FALSE"), "isChangeableDuringProvisioning")
+        .appendField("GroupIdentifier")
+        .appendField(new Blockly.FieldCheckbox("FALSE"), "isGroupIdentifier")
+        .appendField("Searchable")
+        .appendField(new Blockly.FieldCheckbox("FALSE"), "isSearchable")
+        .appendField("ServiceAddress")
+        .appendField(new Blockly.FieldCheckbox("FALSE"), "isServiceAddress")
+        .appendField("DeliveryAddress")
+        .appendField(new Blockly.FieldCheckbox("FALSE"), "isDeliveryAddress");
+    this.appendStatementInput("ServiceSpecificationCharacteristicValues")
+        .setCheck("ServiceSpecificationCharacteristicValue")
+        .appendField("Values:");
+    this.setPreviousStatement(true, "ServiceSpecificationCharacteristic");
+    this.setNextStatement(true, "ServiceSpecificationCharacteristic");
+    this.setColour(330);
+    this.setTooltip('');
+    this.setHelpUrl('http://www.example.com/');
+    },
+    /**
+     * Create XML to represent whether the 'divisorInput' should be present.
+     * @return {Element} XML storage element.
+     * @this Blockly.Block
+     */
+    mutationToDom: function() {
+      var container = document.createElement('mutation');
+      var characteristicValueRequired = (this.getFieldValue('CharacteristicType') == 'selectionlist');
+      container.setAttribute('characteristicValueRequired', characteristicValueRequired);
+      return container;
+    },
+    /**
+     * Parse XML to restore the 'divisorInput'.
+     * @param {!Element} xmlElement XML storage element.
+     * @this Blockly.Block
+     */
+    domToMutation: function(xmlElement) {
+      var characteristicValueRequired = (xmlElement.getAttribute('characteristicValueRequired') == 'true');
+      this.updateShape_(characteristicValueRequired);
+    },
+
+
+  updateShape_: function(characteristicValuesRequired) {
+    // Add or remove a Statement Input.
+    var StatementExists = this.getInput('ServiceSpecificationCharacteristicValues');
+    if (characteristicValuesRequired) {
+      if (!StatementExists) {
+        this.appendStatementInput("ServiceSpecificationCharacteristicValues")
+            .setCheck("ServiceSpecificationCharacteristicValue")
+            .appendField("Values:");
+      }
+    } else if (StatementExists) {
+      this.removeInput("ServiceSpecificationCharacteristicValues");
+    }
+  }
+
+};
+
+Blockly.Blocks['math_number_property'] = {
+  /**
+   * Block for checking if a number is even, odd, prime, whole, positive,
+   * negative or if it is divisible by certain number.
+   * @this Blockly.Block
+   */
+  init: function() {
+    var PROPERTIES =
+        [[Blockly.Msg.MATH_IS_EVEN, 'EVEN'],
+         [Blockly.Msg.MATH_IS_ODD, 'ODD'],
+         [Blockly.Msg.MATH_IS_PRIME, 'PRIME'],
+         [Blockly.Msg.MATH_IS_WHOLE, 'WHOLE'],
+         [Blockly.Msg.MATH_IS_POSITIVE, 'POSITIVE'],
+         [Blockly.Msg.MATH_IS_NEGATIVE, 'NEGATIVE'],
+         [Blockly.Msg.MATH_IS_DIVISIBLE_BY, 'DIVISIBLE_BY']];
+    this.setColour(Blockly.Blocks.math.HUE);
+    this.appendValueInput('NUMBER_TO_CHECK')
+        .setCheck('Number');
+    var dropdown = new Blockly.FieldDropdown(PROPERTIES, function(option) {
+      var divisorInput = (option == 'DIVISIBLE_BY');
+      this.sourceBlock_.updateShape_(divisorInput);
+    });
+    this.appendDummyInput()
+        .appendField(dropdown, 'PROPERTY');
+    this.setInputsInline(false);
+    this.setOutput(true, 'Boolean');
+    this.setTooltip(Blockly.Msg.MATH_IS_TOOLTIP);
+  },
+  /**
+   * Create XML to represent whether the 'divisorInput' should be present.
+   * @return {Element} XML storage element.
+   * @this Blockly.Block
+   */
+  mutationToDom: function() {
+    var container = document.createElement('mutation');
+    var divisorInput = (this.getFieldValue('PROPERTY') == 'DIVISIBLE_BY');
+    container.setAttribute('divisor_input', divisorInput);
+    return container;
+  },
+  /**
+   * Parse XML to restore the 'divisorInput'.
+   * @param {!Element} xmlElement XML storage element.
+   * @this Blockly.Block
+   */
+  domToMutation: function(xmlElement) {
+    var divisorInput = (xmlElement.getAttribute('divisor_input') == 'true');
+    this.updateShape_(divisorInput);
+  },
+  /**
+   * Modify this block to have (or not have) an input for 'is divisible by'.
+   * @param {boolean} divisorInput True if this block has a divisor input.
+   * @private
+   * @this Blockly.Block
+   */
+  updateShape_: function(divisorInput) {
+    // Add or remove a Value Input.
+    var inputExists = this.getInput('DIVISOR');
+    if (divisorInput) {
+      if (!inputExists) {
+        this.appendValueInput('DIVISOR')
+            .setCheck('Number');
+      }
+    } else if (inputExists) {
+      this.removeInput('DIVISOR');
+    }
+  }
+};
+
+
+
+
+Blockly.Blocks['servicespecificationcharacteristicvalue'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("Value")
+        .appendField(new Blockly.FieldTextInput("key"), "CharacteristicValueKey")
+        .appendField("DisplayValue")
+        .appendField(new Blockly.FieldTextInput("displayValue"), "CharacteristicValueDisplayValue")
+        .appendField("DisplayOrder")
+        .appendField(new Blockly.FieldNumber(0, 0), "CharacteristicValueDisplayOrder")
+        .appendField("Description")
+        .appendField(new Blockly.FieldTextInput("description"), "CharacteristicValueDescription");
+    this.setInputsInline(true);
+    this.setPreviousStatement(true, "ServiceSpecificationCharacteristicValue");
+    this.setNextStatement(true, "ServiceSpecificationCharacteristicValue");
+    this.setColour(20);
+    this.setTooltip('');
+    this.setHelpUrl('http://www.example.com/');
+  }
+};
+
+Blockly.Blocks['mediationreference'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("MediationReference")
+        .appendField(new Blockly.FieldDropdown(getMediationFeeds), "MediationReference")
+        .appendField(new Blockly.FieldTextInput("Activation"), "MediationReferenceActivationDate")
+        .appendField(new Blockly.FieldTextInput("Termination"), "MediationReferenceTerminationDate");
+    this.setPreviousStatement(true, "MediationReference");
+    this.setNextStatement(true, "MediationReference");
+    this.setColour(160);
+    this.setTooltip('');
+    this.setHelpUrl('http://www.example.com/');
+  }
+};
+
+function getMediationFeeds() {
+  var options = [];
+  var now = Date.now();
+  var xml = Blockly.Xml.workspaceToDom(workspace);
+  var xml_text = Blockly.Xml.domToText(xml);
+  //alert(xml_text); //block[@type='mediationfeed']/field[@name='mediationFeedKey']/text()
+  var MediationFeedKeys = document.evaluate( "//block[@type='mediationfeed']/field[@name='mediationFeedKey']/text()", xml, null, XPathResult.ANY_TYPE, null );
+
+  options.push(['... select MediationFeed' , 'null']);
+
+  var curMediationFeedKey=MediationFeedKeys.iterateNext();
+  while (curMediationFeedKey) {
+    //alert(curMediationFeedKey.nodeValue);
+    options.push([curMediationFeedKey.nodeValue, curMediationFeedKey.nodeValue]);
+  	curMediationFeedKey=MediationFeedKeys.iterateNext();
+  }
+
+  return options;
+}
+
+Blockly.Blocks['subservice'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("SubService")
+        .appendField(new Blockly.FieldDropdown([["...select SubService", "...select"]]), "subServiceReference")
+        .appendField("NumOfInstances")
+        .appendField(new Blockly.FieldNumber(0, 0), "minNumOfInstances")
+        .appendField("-")
+        .appendField(new Blockly.FieldNumber(0, 0), "maxNumOfInstances")
+        .appendField("Activation")
+        .appendField(new Blockly.FieldTextInput("2016-11-11"), "subServiceActivation")
+        .appendField("Termination")
+        .appendField(new Blockly.FieldTextInput("4000-01-01"), "subServiceTerminiation");
+    this.setPreviousStatement(true, "subService");
+    this.setNextStatement(true, "subService");
+    this.setColour(290);
+    this.setTooltip('');
+    this.setHelpUrl('http://www.example.com/');
+  }
+};
+
+
+
+
+Blockly.JavaScript['mediationevent'] = function(block) {
+  var text_mediationeventname = block.getFieldValue('mediationEventName');
+  var text_mediationeventdescription = block.getFieldValue('mediationEventDescription');
+
+  var code = '<mediationEvent>\n';
+  code=code+'<key>'+text_mediationeventname+'</key>\n';
+  code=code+'<description>'+text_mediationeventdescription+'</description>\n';
+  code=code+'</mediationEvent>\n';
+  return code;
+};
+
+Blockly.JavaScript['mediationfeed'] = function(block) {
+  var text_mediationfeedkey = block.getFieldValue('mediationFeedKey');
+  var text_mediationfeeddescription = block.getFieldValue('mediationFeedDescription');
+  var text_mediationfeedtimezone = block.getFieldValue('mediationFeedtimeZone');
+  var statements_mediationevents = Blockly.JavaScript.statementToCode(block, 'mediationEvents');
+
+  var code = '<mediationFeed>\n';
+  	code=code+'<key>'+text_mediationfeedkey+'</key>\n';
+  	code=code+'<description>'+text_mediationfeeddescription+'</description>\n';
+  	code=code+'<timeZone>'+text_mediationfeedtimezone+'</timeZone>\n';
+  	code=code+'<mediationEvents>\n'+statements_mediationevents+'</mediationEvents>\n';
+  	code=code+'</mediationFeed>\n';
+  return code;
+};
+
+Blockly.JavaScript['serviceconfiguration'] = function(block) {
+  var statements_servicespecifications = Blockly.JavaScript.statementToCode(block, 'serviceSpecifications');
+  var statements_mediationfeeds = Blockly.JavaScript.statementToCode(block, 'MediationFeeds');
+
+  var code = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<serviceConfiguration xmlns="http://www.infonova.com/product/model">\n'+'<serviceSpecifications>\n'+statements_servicespecifications+'</serviceSpecifications>\n<mediationFeeds>\n'+statements_mediationfeeds+'</mediationFeeds>\n</serviceConfiguration>\n';
+  return code;
+};
+
+Blockly.JavaScript['servicespecification'] = function(block) {
+  var text_servicespecificationkey = block.getFieldValue('ServiceSpecificationKey');
+  var text_servicespecificationdisplayname = block.getFieldValue('ServiceSpecificationDisplayName');
+  var text_servicespecificationdescription = block.getFieldValue('ServiceSpecificationDescription');
+  var text_servicespecificationactivationdate = block.getFieldValue('ServiceSpecificationActivationDate');
+  var text_servicespecificationterminationdate = block.getFieldValue('ServiceSpecificationTerminationDate');
+  var statements_servicespecifiactioncharacteristics = Blockly.JavaScript.statementToCode(block, 'serviceSpecifiactionCharacteristics');
+  var statements_subservices = Blockly.JavaScript.statementToCode(block, 'subServices');
+  var statements_mediationreferences = Blockly.JavaScript.statementToCode(block, 'MediationReferences');
+
+  var code = '<serviceSpecification>\n';
+      code = code + '<key>'+text_servicespecificationkey+'</key>\n';
+      code = code + '<description>'+text_servicespecificationdescription+'</description>\n';
+      code = code + '<displayName>'+text_servicespecificationdisplayname+'</displayName>\n';
+      code = code + '<serviceSpecificationCharacteristics>\n'+statements_servicespecifiactioncharacteristics+'</serviceSpecificationCharacteristics>\n';
+      code = code + '<subServices>\n'+statements_subservices+'</subServices>\n';
+      code = code + '<mediationFeedReferences>\n'+statements_mediationreferences+'</mediationFeedReferences>\n';
+      code = code +'</serviceSpecification>\n';
+  return code;
+};
+
+Blockly.JavaScript['servicespecificationcharacteristic'] = function(block) {
+  var text_characteristickey = block.getFieldValue('CharacteristicKey');
+  var text_characteristicdisplayname = block.getFieldValue('CharacteristicDisplayName');
+  var statements_servicespecificationcharacteristicvalues = Blockly.JavaScript.statementToCode(block, 'ServiceSpecificationCharacteristicValues');
+  var dropdown_characteristictype = block.getFieldValue('CharacteristicType');
+  var checkbox_ishidden = block.getFieldValue('isHidden') == 'TRUE';
+  var checkbox_isreadonly = block.getFieldValue('isReadOnly') == 'TRUE';
+  var checkbox_ismandatory = block.getFieldValue('isMandatory') == 'TRUE';
+  var checkbox_isdefaultactive = block.getFieldValue('isDefaultActive') == 'TRUE';
+  var checkbox_ischangable = block.getFieldValue('isChangable') == 'TRUE';
+  var checkbox_isserviceidentifier = block.getFieldValue('isServiceIdentifier') == 'TRUE';
+  var checkbox_ischangeableduringprovisioning = block.getFieldValue('isChangeableDuringProvisioning') == 'TRUE';
+  var checkbox_isgroupidentifier = block.getFieldValue('isGroupIdentifier') == 'TRUE';
+  var checkbox_issearchable = block.getFieldValue('isSearchable') == 'TRUE';
+  var checkbox_isserviceaddress = block.getFieldValue('isServiceAddress') == 'TRUE';
+  var checkbox_isdeliveryaddress = block.getFieldValue('isDeliveryAddress') == 'TRUE';
+
+  var code = '<serviceSpecificationCharacteristic ';
+  	code=code+'isHidden="'+checkbox_ishidden+'" ';
+  	code=code+'isReadOnly="'+checkbox_isreadonly+'" ';
+  	code=code+'isMandatory="'+checkbox_ismandatory+'" ';
+  	code=code+'isDefaultActive="'+checkbox_isdefaultactive+'" ';
+  	code=code+'isChangeable="'+checkbox_ischangable+'" ';
+  	code=code+'isServiceIdentifier="'+checkbox_isserviceidentifier+'" ';
+  	code=code+'isChangeableDuringProvisioning="'+checkbox_ischangeableduringprovisioning+'" ';
+  	code=code+'isGroupIdentifier="'+checkbox_isgroupidentifier+'" ';
+  	code=code+'isSearchable="'+checkbox_issearchable+'" ';
+  	code=code+'isServiceAddress="'+checkbox_isserviceaddress+'" ';
+  	code=code+'isDeliveryAddress="'+checkbox_isdeliveryaddress+'" ';
+  	code=code+'>\n';
+  	code=code+'<characteristicKey>'+text_characteristickey+'</characteristicKey>\n';
+  	code=code+'<characteristicTypeKey>'+dropdown_characteristictype+'</characteristicTypeKey>\n';
+  	code=code+'<displayName>'+text_characteristicdisplayname+'</displayName>\n';
+  	code=code+'<serviceSpecificationCharacteristicValues>\n'+statements_servicespecificationcharacteristicvalues+'</serviceSpecificationCharacteristicValues>\n';
+  	code=code+'</serviceSpecificationCharacteristic>\n';
+  return code;
+};
+
+Blockly.JavaScript['mediationreference'] = function(block) {
+  var dropdown_mediationreference = block.getFieldValue('MediationReference');
+  var text_mediationreferenceactivationdate = block.getFieldValue('MediationReferenceActivationDate');
+  var text_mediationreferenceterminationdate = block.getFieldValue('MediationReferenceTerminationDate');
+
+  var code = '<mediationFeedReference>\n';
+  	code=code+'<mediationFeedKey>'+dropdown_mediationreference+'</mediationFeedKey>\n';
+  	code=code+'<activation>'+text_mediationreferenceactivationdate+'</activation>\n';
+  	code=code+'<termination>'+text_mediationreferenceterminationdate+'</termination>\n';
+  	code=code+'</mediationFeedReference>\n';
+  return code;
+};
+
+Blockly.JavaScript['servicespecificationcharacteristicvalue'] = function(block) {
+  var text_characteristicvaluekey = block.getFieldValue('CharacteristicValueKey');
+  var text_characteristicvaluedisplayvalue = block.getFieldValue('CharacteristicValueDisplayValue');
+  var text_characteristicvaluedisplayorder = block.getFieldValue('CharacteristicValueDisplayOrder');
+  var text_characteristicvaluedescription = block.getFieldValue('CharacteristicValueDescription');
+
+  var code = '<serviceSpecificationCharacteristicValue>\n';
+  	code=code+'<key>'+text_characteristicvaluekey+'</key>\n';
+  	code=code+'<displayName>'+text_characteristicvaluedisplayvalue+'</displayName>\n';
+  	code=code+'<displayOrder>'+text_characteristicvaluedisplayorder+'</displayOrder>\n';
+  	code=code+'<description>'+text_characteristicvaluedescription+'</description>\n';
+  	code=code+'</serviceSpecificationCharacteristicValue>\n';
+  return code;
+};
+
+Blockly.JavaScript['subservice'] = function(block) {
+  var dropdown_subservicereference = block.getFieldValue('subServiceReference');
+  var number_minnumofinstances = block.getFieldValue('minNumOfInstances');
+  var number_maxnumofinstances = block.getFieldValue('maxNumOfInstances');
+  var text_subserviceactivation = block.getFieldValue('subServiceActivation');
+  var text_subserviceterminiation = block.getFieldValue('subServiceTerminiation');
+
+  var code = '<subService>\n';
+  	code=code+'<serviceKey>'+dropdown_subservicereference+'</serviceKey>\n';
+  	code=code+'<minNumberOfInstances>'+number_minnumofinstances+'</minNumberOfInstances>\n';
+  	code=code+'<maxNumberOfInstances>'+number_maxnumofinstances+'</maxNumberOfInstances>\n';
+  	code=code+'<activation>'+number_maxnumofinstances+'</activation>\n';
+  	code=code+'<termination>'+number_maxnumofinstances+'</termination>\n';
+  	code=code+'</subService>\n';
+
+  return code;
+};
+
+    function showCode() {
+      // Generate XML code and display it.
+      Blockly.JavaScript.INFINITE_LOOP_TRAP = null;
+      var code = Blockly.JavaScript.workspaceToCode(workspace);
+      alert(code);
+      var filename = prompt('Enter the file name under which to save your R6 Service Configuration ' + 'library.', 'R6_SRV_Configuraion.xml');
+      // Download file if all necessary parameters are provided.
+      if (filename) {
+        FactoryUtils.createAndDownloadFile(code, filename, 'xml');
+      } else {
+        alert('Could not save Service Configuration without file name under which to ' + 'save library.');
+      }
+
+    }
+
+    function runCode() {
+      // Generate XML code and display it.
+	  var xml = Blockly.Xml.workspaceToDom(workspace);
+      var xml_text = Blockly.Xml.domToText(xml);
+      alert(xml_text);
+    }
+
+    function loadXML() {
+      var xml_text = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><xml xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:fn=\"http://www.w3.org/2005/xpath-functions\" xmlns:R6=\"http://www.infonova.com/product/model\"><block xmlns=\"\" type=\"serviceconfiguration\" x=\"69\" y=\"20\"><statement name=\"serviceSpecifications\"><block type=\"servicespecification\"><field name=\"ServiceSpecificationKey\">MOBILE</field><field name=\"ServiceSpecificationDescription\">Mobile Service</field><field name=\"ServiceSpecificationDisplayName\">Mobile2</field><field name=\"ServiceSpecificationActivationDate\"/></block></statement></block></xml>";
+      var xml_text2 ="<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<offerConfiguration xmlns="http://www.infonova.com/product/model">
+  <baseOffers>
+    <baseOffer isOrderableStandAlone="true">
+      <key>SAP20</key>
+      <description>SAP</description>
+      <invoiceName>SAP20</invoiceName>
+      <internalName>SAP20</internalName>
+      <termsAndConditions>SAP20 T&amp;Cs</termsAndConditions>
+      <tariffModelKey>SAP20_TM</tariffModelKey>
+      <offerTemplateKey>DEFAULT_BASE</offerTemplateKey>
+      <offerTypeKey>BASE</offerTypeKey>
+      <glProductCode>SAP20</glProductCode>
+      <featureGroupReferences>
+        <featureGroupReference isMandatory="false" isChangeable="false" isChangeableDuringProvisioning="false" isDefaultActive="false" terminateWhenBroken="false" terminateWhenInProgress="false" terminateWhenComplete="false" chargeOnTermination="false">
+          <featureGroupKey>SAP_SYSTEMS4</featureGroupKey>
+          <maxNumberOfInstances>99</maxNumberOfInstances>
+          <displayOrder>10</displayOrder>
+        </featureGroupReference>
+      </featureGroupReferences>
+      <serviceFeatureReferences>
+        <serviceFeatureReference isAvailable="true" isMandatory="true" isChangeable="true" isDefaultActive="true" maxNumberOfInstances="1">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>CUSTOMER_REF</serviceFeatureKey>
+          <displayOrder>0</displayOrder>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="true" isChangeable="true" isDefaultActive="true" maxNumberOfInstances="1">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>CRD</serviceFeatureKey>
+          <displayOrder>1</displayOrder>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="true" isChangeable="true" isDefaultActive="true" maxNumberOfInstances="1">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>TSYSTEM_DESIGN_REP</serviceFeatureKey>
+          <displayOrder>1</displayOrder>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="true" isChangeable="true" isDefaultActive="true" maxNumberOfInstances="1">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>DS_REQUESTOR</serviceFeatureKey>
+          <displayOrder>2</displayOrder>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="true" isChangeable="true" isDefaultActive="true" maxNumberOfInstances="1">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>IMPACTED_ENVIRONMENT</serviceFeatureKey>
+          <displayOrder>3</displayOrder>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="true" isChangeable="true" isDefaultActive="true" maxNumberOfInstances="1">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>DATE_REQUESTED</serviceFeatureKey>
+          <displayOrder>4</displayOrder>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="true" isChangeable="true" isDefaultActive="true" maxNumberOfInstances="1">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>CHANGES_HEADER</serviceFeatureKey>
+          <displayOrder>10</displayOrder>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>AC_FT</serviceFeatureKey>
+          <displayOrder>11</displayOrder>
+          <parameterDefinitionValues>
+            <parameterDefinitionValue isAvailable="true">
+              <key>AC_FT_ADD</key>
+            </parameterDefinitionValue>
+            <parameterDefinitionValue isAvailable="true">
+              <key>AC_FT_REMOVE</key>
+            </parameterDefinitionValue>
+          </parameterDefinitionValues>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>AC_FTDR</serviceFeatureKey>
+          <displayOrder>12</displayOrder>
+          <parameterDefinitionValues>
+            <parameterDefinitionValue isAvailable="true">
+              <key>AC FTDR_ADD</key>
+            </parameterDefinitionValue>
+            <parameterDefinitionValue isAvailable="true">
+              <key>AC FTDR_REMOVE</key>
+            </parameterDefinitionValue>
+          </parameterDefinitionValues>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>AC_FTHA</serviceFeatureKey>
+          <displayOrder>13</displayOrder>
+          <parameterDefinitionValues>
+            <parameterDefinitionValue isAvailable="true">
+              <key>AC_FTHA_ADD</key>
+            </parameterDefinitionValue>
+            <parameterDefinitionValue isAvailable="true">
+              <key>AC_FTHA_REMOVE</key>
+            </parameterDefinitionValue>
+          </parameterDefinitionValues>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>AC_OF</serviceFeatureKey>
+          <displayOrder>14</displayOrder>
+          <parameterDefinitionValues>
+            <parameterDefinitionValue isAvailable="true">
+              <key>AC_OF_ADD</key>
+            </parameterDefinitionValue>
+            <parameterDefinitionValue isAvailable="true">
+              <key>AC_OF_REMOVE</key>
+            </parameterDefinitionValue>
+          </parameterDefinitionValues>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>AC_SAPS</serviceFeatureKey>
+          <displayOrder>15</displayOrder>
+          <parameterDefinitionValues>
+            <parameterDefinitionValue isAvailable="true">
+              <key>AC_SAPS_ADD</key>
+            </parameterDefinitionValue>
+            <parameterDefinitionValue isAvailable="true">
+              <key>AC_SAPS_REMOVE</key>
+            </parameterDefinitionValue>
+          </parameterDefinitionValues>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>BIS</serviceFeatureKey>
+          <displayOrder>16</displayOrder>
+          <parameterDefinitionValues>
+            <parameterDefinitionValue isAvailable="true">
+              <key>BIS_ADD</key>
+            </parameterDefinitionValue>
+            <parameterDefinitionValue isAvailable="true">
+              <key>BIS_REMOVE</key>
+            </parameterDefinitionValue>
+          </parameterDefinitionValues>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>BIS-H</serviceFeatureKey>
+          <displayOrder>17</displayOrder>
+          <parameterDefinitionValues>
+            <parameterDefinitionValue isAvailable="true">
+              <key>BIS-H_ADD</key>
+            </parameterDefinitionValue>
+            <parameterDefinitionValue isAvailable="true">
+              <key>BIS-H_REMOVE</key>
+            </parameterDefinitionValue>
+          </parameterDefinitionValues>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>BO_FT</serviceFeatureKey>
+          <displayOrder>18</displayOrder>
+          <parameterDefinitionValues>
+            <parameterDefinitionValue isAvailable="true">
+              <key>BO_FT_ADD</key>
+            </parameterDefinitionValue>
+            <parameterDefinitionValue isAvailable="true">
+              <key>BO_FT_REMOVE</key>
+            </parameterDefinitionValue>
+          </parameterDefinitionValues>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>BO_FTDR</serviceFeatureKey>
+          <displayOrder>19</displayOrder>
+          <parameterDefinitionValues>
+            <parameterDefinitionValue isAvailable="true">
+              <key>BO_FTDR_ADD</key>
+            </parameterDefinitionValue>
+            <parameterDefinitionValue isAvailable="true">
+              <key>BO_FTDR_REMOVE</key>
+            </parameterDefinitionValue>
+          </parameterDefinitionValues>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>BO_FTHA</serviceFeatureKey>
+          <displayOrder>20</displayOrder>
+          <parameterDefinitionValues>
+            <parameterDefinitionValue isAvailable="true">
+              <key>BO_FTHA_ADD</key>
+            </parameterDefinitionValue>
+            <parameterDefinitionValue isAvailable="true">
+              <key>BO_FTHA_REMOVE</key>
+            </parameterDefinitionValue>
+          </parameterDefinitionValues>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>BO_OF</serviceFeatureKey>
+          <displayOrder>21</displayOrder>
+          <parameterDefinitionValues>
+            <parameterDefinitionValue isAvailable="true">
+              <key>BO_OF_ADD</key>
+            </parameterDefinitionValue>
+            <parameterDefinitionValue isAvailable="true">
+              <key>BO_OF_REMOVE</key>
+            </parameterDefinitionValue>
+          </parameterDefinitionValues>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>BO_SAPS</serviceFeatureKey>
+          <displayOrder>22</displayOrder>
+          <parameterDefinitionValues>
+            <parameterDefinitionValue isAvailable="true">
+              <key>BO_SAPS_ADD</key>
+            </parameterDefinitionValue>
+            <parameterDefinitionValue isAvailable="true">
+              <key>BO_SAPS_REMOVE</key>
+            </parameterDefinitionValue>
+          </parameterDefinitionValues>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>CC_FT</serviceFeatureKey>
+          <displayOrder>23</displayOrder>
+          <parameterDefinitionValues>
+            <parameterDefinitionValue isAvailable="true">
+              <key>CC_FT_ADD</key>
+            </parameterDefinitionValue>
+            <parameterDefinitionValue isAvailable="true">
+              <key>CC_FT_REMOVE</key>
+            </parameterDefinitionValue>
+          </parameterDefinitionValues>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>CC_FTDR</serviceFeatureKey>
+          <displayOrder>24</displayOrder>
+          <parameterDefinitionValues>
+            <parameterDefinitionValue isAvailable="true">
+              <key>CC_FTDR_ADD</key>
+            </parameterDefinitionValue>
+            <parameterDefinitionValue isAvailable="true">
+              <key>CC_FTDR_REMOVE</key>
+            </parameterDefinitionValue>
+          </parameterDefinitionValues>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>CC_FTHA</serviceFeatureKey>
+          <displayOrder>25</displayOrder>
+          <parameterDefinitionValues>
+            <parameterDefinitionValue isAvailable="true">
+              <key>CC_FTHA_ADD</key>
+            </parameterDefinitionValue>
+            <parameterDefinitionValue isAvailable="true">
+              <key>CC_FTHA_REMOVE</key>
+            </parameterDefinitionValue>
+          </parameterDefinitionValues>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>CC_OF</serviceFeatureKey>
+          <displayOrder>26</displayOrder>
+          <parameterDefinitionValues>
+            <parameterDefinitionValue isAvailable="true">
+              <key>CC_OF_ADD</key>
+            </parameterDefinitionValue>
+            <parameterDefinitionValue isAvailable="true">
+              <key>CC_OF_REMOVE</key>
+            </parameterDefinitionValue>
+          </parameterDefinitionValues>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>CC_SAPS</serviceFeatureKey>
+          <displayOrder>27</displayOrder>
+          <parameterDefinitionValues>
+            <parameterDefinitionValue isAvailable="true">
+              <key>CC_SAPS_ADD</key>
+            </parameterDefinitionValue>
+            <parameterDefinitionValue isAvailable="true">
+              <key>CC_SAPS_REMOVE</key>
+            </parameterDefinitionValue>
+          </parameterDefinitionValues>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>DS_FT</serviceFeatureKey>
+          <displayOrder>28</displayOrder>
+          <parameterDefinitionValues>
+            <parameterDefinitionValue isAvailable="true">
+              <key>DS_FT_ADD</key>
+            </parameterDefinitionValue>
+            <parameterDefinitionValue isAvailable="true">
+              <key>DS_FT_REMOVE</key>
+            </parameterDefinitionValue>
+          </parameterDefinitionValues>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>DS_FTDR</serviceFeatureKey>
+          <displayOrder>29</displayOrder>
+          <parameterDefinitionValues>
+            <parameterDefinitionValue isAvailable="true">
+              <key>DS_FTDR_ADD</key>
+            </parameterDefinitionValue>
+            <parameterDefinitionValue isAvailable="true">
+              <key>DS_FTDR_REMOVE</key>
+            </parameterDefinitionValue>
+          </parameterDefinitionValues>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>DS_FTHA</serviceFeatureKey>
+          <displayOrder>30</displayOrder>
+          <parameterDefinitionValues>
+            <parameterDefinitionValue isAvailable="true">
+              <key>DS_FTHA_ADD</key>
+            </parameterDefinitionValue>
+            <parameterDefinitionValue isAvailable="true">
+              <key>DS_FTHA_REMOVE</key>
+            </parameterDefinitionValue>
+          </parameterDefinitionValues>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>DS_OF</serviceFeatureKey>
+          <displayOrder>31</displayOrder>
+          <parameterDefinitionValues>
+            <parameterDefinitionValue isAvailable="true">
+              <key>DS_OF_ADD</key>
+            </parameterDefinitionValue>
+            <parameterDefinitionValue isAvailable="true">
+              <key>DS_OF_REMOVE</key>
+            </parameterDefinitionValue>
+          </parameterDefinitionValues>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>DS_SAPS</serviceFeatureKey>
+          <displayOrder>32</displayOrder>
+          <parameterDefinitionValues>
+            <parameterDefinitionValue isAvailable="true">
+              <key>DS_SAPS_ADD</key>
+            </parameterDefinitionValue>
+            <parameterDefinitionValue isAvailable="true">
+              <key>DS_SAPS_REMOVE</key>
+            </parameterDefinitionValue>
+          </parameterDefinitionValues>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>FIREWALL_LARGE</serviceFeatureKey>
+          <displayOrder>33</displayOrder>
+          <parameterDefinitionValues>
+            <parameterDefinitionValue isAvailable="true">
+              <key>FIREWALL_LARGE_ADD</key>
+            </parameterDefinitionValue>
+            <parameterDefinitionValue isAvailable="true">
+              <key>FIREWALL_LARGE_REMOVE</key>
+            </parameterDefinitionValue>
+          </parameterDefinitionValues>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>FIREWALL_MEDIUM</serviceFeatureKey>
+          <displayOrder>34</displayOrder>
+          <parameterDefinitionValues>
+            <parameterDefinitionValue isAvailable="true">
+              <key>FIREWALL_MEDIUM_ADD</key>
+            </parameterDefinitionValue>
+            <parameterDefinitionValue isAvailable="true">
+              <key>FIREWALL_MEDIUM_REMOVE</key>
+            </parameterDefinitionValue>
+          </parameterDefinitionValues>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>HANA_SAPS</serviceFeatureKey>
+          <displayOrder>35</displayOrder>
+          <parameterDefinitionValues>
+            <parameterDefinitionValue isAvailable="true">
+              <key>HANA_SAPS_ADD</key>
+            </parameterDefinitionValue>
+            <parameterDefinitionValue isAvailable="true">
+              <key>HANA_SAPS_REMOVE</key>
+            </parameterDefinitionValue>
+          </parameterDefinitionValues>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>HANA_SPARE</serviceFeatureKey>
+          <displayOrder>36</displayOrder>
+          <parameterDefinitionValues>
+            <parameterDefinitionValue isAvailable="true">
+              <key>HANA_SPARE_ADD</key>
+            </parameterDefinitionValue>
+            <parameterDefinitionValue isAvailable="true">
+              <key>HANA_SPARE_REMOVE</key>
+            </parameterDefinitionValue>
+          </parameterDefinitionValues>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>HANA_USAGE</serviceFeatureKey>
+          <displayOrder>37</displayOrder>
+          <parameterDefinitionValues>
+            <parameterDefinitionValue isAvailable="true">
+              <key>HANA_USAGE_ADD</key>
+            </parameterDefinitionValue>
+            <parameterDefinitionValue isAvailable="true">
+              <key>HANA_USAGE_REMOVE</key>
+            </parameterDefinitionValue>
+          </parameterDefinitionValues>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>INTERNET_VPN</serviceFeatureKey>
+          <displayOrder>38</displayOrder>
+          <parameterDefinitionValues>
+            <parameterDefinitionValue isAvailable="true">
+              <key>INTERNET_VPN_ADD</key>
+            </parameterDefinitionValue>
+            <parameterDefinitionValue isAvailable="true">
+              <key>INTERNET_VPN_REMOVE</key>
+            </parameterDefinitionValue>
+          </parameterDefinitionValues>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>MPLS_BACKBONE</serviceFeatureKey>
+          <displayOrder>39</displayOrder>
+          <parameterDefinitionValues>
+            <parameterDefinitionValue isAvailable="true">
+              <key>MPLS_BACKBONE_ADD</key>
+            </parameterDefinitionValue>
+            <parameterDefinitionValue isAvailable="true">
+              <key>MPLS_BACKBONE_REMOVE</key>
+            </parameterDefinitionValue>
+          </parameterDefinitionValues>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>SPARE_SAPS</serviceFeatureKey>
+          <displayOrder>40</displayOrder>
+          <parameterDefinitionValues>
+            <parameterDefinitionValue isAvailable="true">
+              <key>SPARE_SAPS_ADD</key>
+            </parameterDefinitionValue>
+            <parameterDefinitionValue isAvailable="true">
+              <key>SPARE_SAPS_REMOVE</key>
+            </parameterDefinitionValue>
+          </parameterDefinitionValues>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>SAP_TECH_COORD</serviceFeatureKey>
+          <displayOrder>50</displayOrder>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>SAP_STARTUP</serviceFeatureKey>
+          <displayOrder>51</displayOrder>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>SAP_RUNDOWN</serviceFeatureKey>
+          <displayOrder>52</displayOrder>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>VLAN_STARTUP</serviceFeatureKey>
+          <displayOrder>53</displayOrder>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>VLAN_RUNDOWN</serviceFeatureKey>
+          <displayOrder>54</displayOrder>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>SAP_TRANSPORT</serviceFeatureKey>
+          <displayOrder>55</displayOrder>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>SAP_ABAP</serviceFeatureKey>
+          <displayOrder>56</displayOrder>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>SAP_JAVA</serviceFeatureKey>
+          <displayOrder>57</displayOrder>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>SAP_CLIENT_COPY</serviceFeatureKey>
+          <displayOrder>58</displayOrder>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>SAP_SYSTEM_COPY</serviceFeatureKey>
+          <displayOrder>59</displayOrder>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>DATABASE_COPY</serviceFeatureKey>
+          <displayOrder>60</displayOrder>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>SAP_DATABASE_UPGRADE</serviceFeatureKey>
+          <displayOrder>61</displayOrder>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>SAP_UPGRADE</serviceFeatureKey>
+          <displayOrder>62</displayOrder>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>SAP_ENHANCEMENT</serviceFeatureKey>
+          <displayOrder>63</displayOrder>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>SAP_HANA_DB_UPGRADE</serviceFeatureKey>
+          <displayOrder>64</displayOrder>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="99">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>SAP_LANG_INSTALL</serviceFeatureKey>
+          <displayOrder>65</displayOrder>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="1">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>SAP_CONSULTANT_DAYS</serviceFeatureKey>
+          <displayOrder>80</displayOrder>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="1">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>SAP_PROJ_MAN_DAYS</serviceFeatureKey>
+          <displayOrder>81</displayOrder>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="1">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>SAP_HANA_CONSULTANT_DAYS</serviceFeatureKey>
+          <displayOrder>82</displayOrder>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="1">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>SAP_NEARSHORE_CONSULTANT_DAYS</serviceFeatureKey>
+          <displayOrder>83</displayOrder>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="1">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>SAP_PRINCE_NEARSHORE_CON_DAYS</serviceFeatureKey>
+          <displayOrder>83</displayOrder>
+        </serviceFeatureReference>
+        <serviceFeatureReference isAvailable="true" isMandatory="false" isChangeable="true" isDefaultActive="false" maxNumberOfInstances="1">
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceFeatureKey>SAP_SENIOR_NEARSHORE_CON_DAYS</serviceFeatureKey>
+          <displayOrder>83</displayOrder>
+        </serviceFeatureReference>
+      </serviceFeatureReferences>
+      <serviceReferences>
+        <serviceReference chargeUsage="true">
+          <serviceKey>SAP_Service8</serviceKey>
+          <serviceMandatorKey>VSO01</serviceMandatorKey>
+        </serviceReference>
+      </serviceReferences>
+    </baseOffer>
+  </baseOffers>
+  <offerChannelAssignments>
+    <offerChannelAssignment>
+      <offerKey>SAP20</offerKey>
+      <channelKey>BTGS_UK_CHANNEL</channelKey>
+    </offerChannelAssignment>
+  </offerChannelAssignments>
+  <featureGroups>
+    <featureGroup isSingleFeatureGroup="true" isGlobal="false" requiresProvisioning="true">
+      <key>SAP_SYSTEMS4</key>
+      <displayName>SAP Systems</displayName>
+      <description>SAP Systems</description>
+      <chargeTypeKey>ONCE_ONLY</chargeTypeKey>
+      <featureAssignmentLevelKey>OFFER</featureAssignmentLevelKey>
+      <minActive>1</minActive>
+      <maxActive>99</maxActive>
+      <features>
+        <feature isMandatory="false" isChangeable="true" isDefaultActive="false">
+          <key>SAP_SYSTEMS4</key>
+          <displayName>SAP Systems</displayName>
+          <description>SAP Systems</description>
+          <externalReferenceKey>SAP_SYSTEMS4</externalReferenceKey>
+          <serviceReference>
+            <serviceMandatorKey>VSO01</serviceMandatorKey>
+            <serviceKey>SAP_SYSTEMS4</serviceKey>
+          </serviceReference>
+        </feature>
+      </features>
+    </featureGroup>
+  </featureGroups>
+  <featureGroupDisplayCategories>
+    <definitions>
+      <featureGroupDisplayCategory collapsed="true">
+        <key>ORDER_HDR</key>
+        <displayName>Order</displayName>
+        <displayOrder>1</displayOrder>
+      </featureGroupDisplayCategory>
+      <featureGroupDisplayCategory collapsed="true">
+        <key>SYSTEM_CHANGES_HDR</key>
+        <displayName>System Changes</displayName>
+        <displayOrder>2</displayOrder>
+      </featureGroupDisplayCategory>
+      <featureGroupDisplayCategory collapsed="true">
+        <key>ADDITIONAL_SVC_HDR</key>
+        <displayName>Additional Services</displayName>
+        <displayOrder>3</displayOrder>
+      </featureGroupDisplayCategory>
+      <featureGroupDisplayCategory collapsed="true">
+        <key>ADDITIONAL_RESOURCE_HDR</key>
+        <displayName>Additional Resource Time</displayName>
+        <displayOrder>4</displayOrder>
+      </featureGroupDisplayCategory>
+    </definitions>
+    <mappings>
+      <featureGroupDisplayCategoryMapping>
+        <featureGroupKey>SAP_SYSTEMS4</featureGroupKey>
+        <categoryKey>ORDER_HDR</categoryKey>
+      </featureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>AC_FT</featureGroupKey>
+        <categoryKey>SYSTEM_CHANGES_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>AC_FTDR</featureGroupKey>
+        <categoryKey>SYSTEM_CHANGES_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>AC_FTHA</featureGroupKey>
+        <categoryKey>SYSTEM_CHANGES_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>AC_OF</featureGroupKey>
+        <categoryKey>SYSTEM_CHANGES_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>AC_SAPS</featureGroupKey>
+        <categoryKey>SYSTEM_CHANGES_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>BIS</featureGroupKey>
+        <categoryKey>SYSTEM_CHANGES_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>BIS-H</featureGroupKey>
+        <categoryKey>SYSTEM_CHANGES_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>BO_FT</featureGroupKey>
+        <categoryKey>SYSTEM_CHANGES_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>BO_FTDR</featureGroupKey>
+        <categoryKey>SYSTEM_CHANGES_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>BO_FTHA</featureGroupKey>
+        <categoryKey>SYSTEM_CHANGES_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>BO_OF</featureGroupKey>
+        <categoryKey>SYSTEM_CHANGES_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>BO_SAPS</featureGroupKey>
+        <categoryKey>SYSTEM_CHANGES_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>CC_FT</featureGroupKey>
+        <categoryKey>SYSTEM_CHANGES_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>CC_FTDR</featureGroupKey>
+        <categoryKey>SYSTEM_CHANGES_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>CC_FTHA</featureGroupKey>
+        <categoryKey>SYSTEM_CHANGES_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>CC_OF</featureGroupKey>
+        <categoryKey>SYSTEM_CHANGES_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>CC_SAPS</featureGroupKey>
+        <categoryKey>SYSTEM_CHANGES_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>CHANGES_HEADER</featureGroupKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>CRD</featureGroupKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>CUSTOMER_REF</featureGroupKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>DATABASE_COPY</featureGroupKey>
+        <categoryKey>ADDITIONAL_SVC_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>DATE_REQUESTED</featureGroupKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>DS_FT</featureGroupKey>
+        <categoryKey>SYSTEM_CHANGES_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>DS_FTDR</featureGroupKey>
+        <categoryKey>SYSTEM_CHANGES_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>DS_FTHA</featureGroupKey>
+        <categoryKey>SYSTEM_CHANGES_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>DS_OF</featureGroupKey>
+        <categoryKey>SYSTEM_CHANGES_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>DS_REQUESTOR</featureGroupKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>DS_SAPS</featureGroupKey>
+        <categoryKey>SYSTEM_CHANGES_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>FIREWALL_LARGE</featureGroupKey>
+        <categoryKey>SYSTEM_CHANGES_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>FIREWALL_MEDIUM</featureGroupKey>
+        <categoryKey>SYSTEM_CHANGES_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>HANA_SAPS</featureGroupKey>
+        <categoryKey>SYSTEM_CHANGES_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>HANA_SPARE</featureGroupKey>
+        <categoryKey>SYSTEM_CHANGES_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>HANA_USAGE</featureGroupKey>
+        <categoryKey>SYSTEM_CHANGES_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>IMPACTED_ENVIRONMENT</featureGroupKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>INTERNET_VPN</featureGroupKey>
+        <categoryKey>SYSTEM_CHANGES_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>MPLS_BACKBONE</featureGroupKey>
+        <categoryKey>SYSTEM_CHANGES_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>SAP_ABAP</featureGroupKey>
+        <categoryKey>ADDITIONAL_SVC_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>SAP_CLIENT_COPY</featureGroupKey>
+        <categoryKey>ADDITIONAL_SVC_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>SAP_CONSULTANT_DAYS</featureGroupKey>
+        <categoryKey>ADDITIONAL_RESOURCE_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>SAP_DATABASE_UPGRADE</featureGroupKey>
+        <categoryKey>ADDITIONAL_SVC_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>SAP_ENHANCEMENT</featureGroupKey>
+        <categoryKey>ADDITIONAL_SVC_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>SAP_HANA_CONSULTANT_DAYS</featureGroupKey>
+        <categoryKey>ADDITIONAL_RESOURCE_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>SAP_HANA_DB_UPGRADE</featureGroupKey>
+        <categoryKey>ADDITIONAL_SVC_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>SAP_JAVA</featureGroupKey>
+        <categoryKey>ADDITIONAL_SVC_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>SAP_LANG_INSTALL</featureGroupKey>
+        <categoryKey>ADDITIONAL_SVC_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>SAP_NEARSHORE_CONSULTANT_DAYS</featureGroupKey>
+        <categoryKey>ADDITIONAL_RESOURCE_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>SAP_PRINCE_NEARSHORE_CON_DAYS</featureGroupKey>
+        <categoryKey>ADDITIONAL_RESOURCE_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>SAP_PROJ_MAN_DAYS</featureGroupKey>
+        <categoryKey>ADDITIONAL_RESOURCE_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>SAP_RUNDOWN</featureGroupKey>
+        <categoryKey>ADDITIONAL_SVC_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>SAP_SENIOR_NEARSHORE_CON_DAYS</featureGroupKey>
+        <categoryKey>ADDITIONAL_RESOURCE_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>SAP_STARTUP</featureGroupKey>
+        <categoryKey>ADDITIONAL_SVC_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>SAP_SYSTEM_COPY</featureGroupKey>
+        <categoryKey>ADDITIONAL_SVC_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>SAP_TECH_COORD</featureGroupKey>
+        <categoryKey>ADDITIONAL_SVC_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>SAP_TRANSPORT</featureGroupKey>
+        <categoryKey>ADDITIONAL_SVC_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>SAP_UPGRADE</featureGroupKey>
+        <categoryKey>ADDITIONAL_SVC_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>SPARE_SAPS</featureGroupKey>
+        <categoryKey>SYSTEM_CHANGES_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>TSYSTEM_DESIGN_REP</featureGroupKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>VLAN_RUNDOWN</featureGroupKey>
+        <categoryKey>ADDITIONAL_SVC_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+      <serviceFeatureGroupDisplayCategoryMapping>
+        <featureGroupKey>VLAN_STARTUP</featureGroupKey>
+        <categoryKey>ADDITIONAL_SVC_HDR</categoryKey>
+        <serviceMandatorKey>VSO01</serviceMandatorKey>
+        <serviceKey>SAP_Service8</serviceKey>
+      </serviceFeatureGroupDisplayCategoryMapping>
+    </mappings>
+  </featureGroupDisplayCategories>
+  <offerDisplayCategories>
+    <definitions>
+      <offerDisplayCategory>
+        <categoryKey>BT_COMPUTE_LOCAL_SERVICES</categoryKey>
+        <displayName>BT Compute (Value Added Services)</displayName>
+        <displayOrder>3</displayOrder>
+      </offerDisplayCategory>
+    </definitions>
+    <mappings>
+      <offerDisplayCategoryMapping>
+        <offerKey>SAP20</offerKey>
+        <categoriesKeys>
+          <categoryKey>BT_COMPUTE_LOCAL_SERVICES</categoryKey>
+        </categoriesKeys>
+      </offerDisplayCategoryMapping>
+    </mappings>
+  </offerDisplayCategories>
+  <tariffModels>
+    <tariffModel isOfferIndependent="false">
+      <key>SAP20_TM</key>
+    </tariffModel>
+  </tariffModels>
+  <i18n defaultLanguage="en">
+    <language key="en">
+      <text key="ino_offers.feature_param_def_values.AC FTDR_ADD.display_name">Add</text>
+      <text key="ino_offers.feature_param_def_values.AC FTDR_REMOVE.display_name">Remove</text>
+      <text key="ino_offers.feature_param_def_values.AC_FTHA_ADD.display_name">Add</text>
+      <text key="ino_offers.feature_param_def_values.AC_FTHA_REMOVE.display_name">Remove</text>
+      <text key="ino_offers.feature_param_def_values.AC_FT_ADD.display_name">Add</text>
+      <text key="ino_offers.feature_param_def_values.AC_FT_REMOVE.display_name">Remove</text>
+      <text key="ino_offers.feature_param_def_values.AC_OF_ADD.display_name">Add</text>
+      <text key="ino_offers.feature_param_def_values.AC_OF_REMOVE.display_name">Remove</text>
+      <text key="ino_offers.feature_param_def_values.AC_SAPS_ADD.display_name">Add</text>
+      <text key="ino_offers.feature_param_def_values.AC_SAPS_REMOVE.display_name">Remove</text>
+      <text key="ino_offers.feature_param_def_values.BIS-H_ADD.display_name">Add</text>
+      <text key="ino_offers.feature_param_def_values.BIS-H_REMOVE.display_name">Remove</text>
+      <text key="ino_offers.feature_param_def_values.BIS_ADD.display_name">Add</text>
+      <text key="ino_offers.feature_param_def_values.BIS_REMOVE.display_name">Remove</text>
+      <text key="ino_offers.feature_param_def_values.BO_FTDR_ADD.display_name">Add</text>
+      <text key="ino_offers.feature_param_def_values.BO_FTDR_REMOVE.display_name">Remove</text>
+      <text key="ino_offers.feature_param_def_values.BO_FTHA_ADD.display_name">Add</text>
+      <text key="ino_offers.feature_param_def_values.BO_FTHA_REMOVE.display_name">Remove</text>
+      <text key="ino_offers.feature_param_def_values.BO_FT_ADD.display_name">Add</text>
+      <text key="ino_offers.feature_param_def_values.BO_FT_REMOVE.display_name">Remove</text>
+      <text key="ino_offers.feature_param_def_values.BO_OF_ADD.display_name">Add</text>
+      <text key="ino_offers.feature_param_def_values.BO_OF_REMOVE.display_name">Remove</text>
+      <text key="ino_offers.feature_param_def_values.BO_SAPS_ADD.display_name">Add</text>
+      <text key="ino_offers.feature_param_def_values.BO_SAPS_REMOVE.display_name">Remove</text>
+      <text key="ino_offers.feature_param_def_values.CC_FTDR_ADD.display_name">Add</text>
+      <text key="ino_offers.feature_param_def_values.CC_FTDR_REMOVE.display_name">Remove</text>
+      <text key="ino_offers.feature_param_def_values.CC_FTHA_ADD.display_name">Add</text>
+      <text key="ino_offers.feature_param_def_values.CC_FTHA_REMOVE.display_name">Remove</text>
+      <text key="ino_offers.feature_param_def_values.CC_FT_ADD.display_name">Add</text>
+      <text key="ino_offers.feature_param_def_values.CC_FT_REMOVE.display_name">Remove</text>
+      <text key="ino_offers.feature_param_def_values.CC_OF_ADD.display_name">Add</text>
+      <text key="ino_offers.feature_param_def_values.CC_OF_REMOVE.display_name">Remove</text>
+      <text key="ino_offers.feature_param_def_values.CC_SAPS_ADD.display_name">Add</text>
+      <text key="ino_offers.feature_param_def_values.CC_SAPS_REMOVE.display_name">Remove</text>
+      <text key="ino_offers.feature_param_def_values.DS_FTDR_ADD.display_name">Add</text>
+      <text key="ino_offers.feature_param_def_values.DS_FTDR_REMOVE.display_name">Remove</text>
+      <text key="ino_offers.feature_param_def_values.DS_FTHA_ADD.display_name">Add</text>
+      <text key="ino_offers.feature_param_def_values.DS_FTHA_REMOVE.display_name">Remove</text>
+      <text key="ino_offers.feature_param_def_values.DS_FT_ADD.display_name">Add</text>
+      <text key="ino_offers.feature_param_def_values.DS_FT_REMOVE.display_name">Remove</text>
+      <text key="ino_offers.feature_param_def_values.DS_OF_ADD.display_name">Add</text>
+      <text key="ino_offers.feature_param_def_values.DS_OF_REMOVE.display_name">Remove</text>
+      <text key="ino_offers.feature_param_def_values.DS_SAPS_ADD.display_name">Add</text>
+      <text key="ino_offers.feature_param_def_values.DS_SAPS_REMOVE.display_name">Remove</text>
+      <text key="ino_offers.feature_param_def_values.FIREWALL_LARGE_ADD.display_name">Add</text>
+      <text key="ino_offers.feature_param_def_values.FIREWALL_LARGE_REMOVE.display_name">Remove</text>
+      <text key="ino_offers.feature_param_def_values.FIREWALL_MEDIUM_ADD.display_name">Add</text>
+      <text key="ino_offers.feature_param_def_values.FIREWALL_MEDIUM_REMOVE.display_name">Remove</text>
+      <text key="ino_offers.feature_param_def_values.FULLTIMEHA_DR_SLA.display_name">Full Time HA DR</text>
+      <text key="ino_offers.feature_param_def_values.FULLTIMEHA_SLA.display_name">Full Time HA</text>
+      <text key="ino_offers.feature_param_def_values.FULLTIME_SLA.display_name">Full Time</text>
+      <text key="ino_offers.feature_param_def_values.HANA_SAPS_ADD.display_name">Add</text>
+      <text key="ino_offers.feature_param_def_values.HANA_SAPS_REMOVE.display_name">Remove</text>
+      <text key="ino_offers.feature_param_def_values.HANA_SPARE_ADD.display_name">Add</text>
+      <text key="ino_offers.feature_param_def_values.HANA_SPARE_REMOVE.display_name">Remove</text>
+      <text key="ino_offers.feature_param_def_values.HANA_USAGE_ADD.display_name">Add</text>
+      <text key="ino_offers.feature_param_def_values.HANA_USAGE_REMOVE.display_name">Remove</text>
+      <text key="ino_offers.feature_param_def_values.INTERNET_VPN_ADD.display_name">Add</text>
+      <text key="ino_offers.feature_param_def_values.INTERNET_VPN_REMOVE.display_name">Remove</text>
+      <text key="ino_offers.feature_param_def_values.MPLS_BACKBONE_ADD.display_name">Add</text>
+      <text key="ino_offers.feature_param_def_values.MPLS_BACKBONE_REMOVE.display_name">Remove</text>
+      <text key="ino_offers.feature_param_def_values.OFFICEHA_SLA.display_name">Office HA</text>
+      <text key="ino_offers.feature_param_def_values.OFFICE_SLA.display_name">Office</text>
+      <text key="ino_offers.feature_param_def_values.SPARE_SAPS_ADD.display_name">Add</text>
+      <text key="ino_offers.feature_param_def_values.SPARE_SAPS_REMOVE.display_name">Remove</text>
+      <text key="ino_offers.features.SAP_SYSTEMS1.DB_SIZE.description">DB Size in GB</text>
+      <text key="ino_offers.features.SAP_SYSTEMS1.DB_SIZE.display_name">DB Size</text>
+      <text key="ino_offers.features.SAP_SYSTEMS1.FUNCTION.description">Function</text>
+      <text key="ino_offers.features.SAP_SYSTEMS1.FUNCTION.display_name">Function</text>
+      <text key="ino_offers.features.SAP_SYSTEMS1.RELEASE.description">Release</text>
+      <text key="ino_offers.features.SAP_SYSTEMS1.RELEASE.display_name">Release</text>
+      <text key="ino_offers.features.SAP_SYSTEMS1.SAPS_REQUIRED.description">SAPS Required</text>
+      <text key="ino_offers.features.SAP_SYSTEMS1.SAPS_REQUIRED.display_name">SAPS Required</text>
+      <text key="ino_offers.features.SAP_SYSTEMS1.SAP_SYSTEMS_HDR.description">SAP Systems</text>
+      <text key="ino_offers.features.SAP_SYSTEMS1.SAP_SYSTEMS_HDR.display_name">SAP Systems</text>
+      <text key="ino_offers.features.SAP_SYSTEMS1.SID.description">SID</text>
+      <text key="ino_offers.features.SAP_SYSTEMS1.SID.display_name">SID</text>
+      <text key="ino_offers.features.SAP_SYSTEMS1.SYSTEM_TYPE.description">System Type</text>
+      <text key="ino_offers.features.SAP_SYSTEMS1.SYSTEM_TYPE.display_name">System Type</text>
+      <text key="ino_offers.features.SAP_SYSTEMS1.TARGET_SLA.description">Target SLA</text>
+      <text key="ino_offers.features.SAP_SYSTEMS1.TARGET_SLA.display_name">Target SLA</text>
+      <text key="ino_offers.features.SAP_Service8.AC_FT.description">AC FT Option</text>
+      <text key="ino_offers.features.SAP_Service8.AC_FT.display_name">AC FT</text>
+      <text key="ino_offers.features.SAP_Service8.AC_FTDR.description">AC FT Option</text>
+      <text key="ino_offers.features.SAP_Service8.AC_FTDR.display_name">AC FTDR</text>
+      <text key="ino_offers.features.SAP_Service8.AC_FTHA.description">AC FTHA Option</text>
+      <text key="ino_offers.features.SAP_Service8.AC_FTHA.display_name">AC FTHA</text>
+      <text key="ino_offers.features.SAP_Service8.AC_OF.description">AC OF Option</text>
+      <text key="ino_offers.features.SAP_Service8.AC_OF.display_name">AC OF</text>
+      <text key="ino_offers.features.SAP_Service8.AC_SAPS.description">AC SAPS Option</text>
+      <text key="ino_offers.features.SAP_Service8.AC_SAPS.display_name">AC SAPS</text>
+      <text key="ino_offers.features.SAP_Service8.BIS-H.description">BIS-H Option</text>
+      <text key="ino_offers.features.SAP_Service8.BIS-H.display_name">BIS-H</text>
+      <text key="ino_offers.features.SAP_Service8.BIS.description">BIS Option</text>
+      <text key="ino_offers.features.SAP_Service8.BIS.display_name">BIS</text>
+      <text key="ino_offers.features.SAP_Service8.BO_FT.description">BO FT Option</text>
+      <text key="ino_offers.features.SAP_Service8.BO_FT.display_name">BO FT</text>
+      <text key="ino_offers.features.SAP_Service8.BO_FTDR.description">BO FTDR Option</text>
+      <text key="ino_offers.features.SAP_Service8.BO_FTDR.display_name">BO FTDR</text>
+      <text key="ino_offers.features.SAP_Service8.BO_FTHA.description">BO FTHA Option</text>
+      <text key="ino_offers.features.SAP_Service8.BO_FTHA.display_name">BO FTHA</text>
+      <text key="ino_offers.features.SAP_Service8.BO_OF.description">BO OF Option</text>
+      <text key="ino_offers.features.SAP_Service8.BO_OF.display_name">BO OF</text>
+      <text key="ino_offers.features.SAP_Service8.BO_SAPS.description">BO SAPS Option</text>
+      <text key="ino_offers.features.SAP_Service8.BO_SAPS.display_name">BO SAPS</text>
+      <text key="ino_offers.features.SAP_Service8.CC_FT.description">CC FT Option</text>
+      <text key="ino_offers.features.SAP_Service8.CC_FT.display_name">CC FT</text>
+      <text key="ino_offers.features.SAP_Service8.CC_FTDR.description">CC FTDR Option</text>
+      <text key="ino_offers.features.SAP_Service8.CC_FTDR.display_name">CC FTDR</text>
+      <text key="ino_offers.features.SAP_Service8.CC_FTHA.description">CC FTHA Option</text>
+      <text key="ino_offers.features.SAP_Service8.CC_FTHA.display_name">CC FTHA</text>
+      <text key="ino_offers.features.SAP_Service8.CC_OF.description">CC OF Option</text>
+      <text key="ino_offers.features.SAP_Service8.CC_OF.display_name">CC OF</text>
+      <text key="ino_offers.features.SAP_Service8.CC_SAPS.description">CC SAPS Option</text>
+      <text key="ino_offers.features.SAP_Service8.CC_SAPS.display_name">CC SAPS</text>
+      <text key="ino_offers.features.SAP_Service8.CHANGES_HEADER.description">Please select the SAP modules which you wish to change.</text>
+      <text key="ino_offers.features.SAP_Service8.CHANGES_HEADER.display_name">System Changes</text>
+      <text key="ino_offers.features.SAP_Service8.CRD.display_name">Requested Delivery Date</text>
+      <text key="ino_offers.features.SAP_Service8.CUSTOMER_REF.display_name">Customer Reference</text>
+      <text key="ino_offers.features.SAP_Service8.DATABASE_COPY.description">Database Copy (UP TO 250GB)</text>
+      <text key="ino_offers.features.SAP_Service8.DATABASE_COPY.display_name">Database Copy (UP TO 250GB)</text>
+      <text key="ino_offers.features.SAP_Service8.DATE_REQUESTED.display_name">Date of Request</text>
+      <text key="ino_offers.features.SAP_Service8.DS_FT.description">DS FT Option</text>
+      <text key="ino_offers.features.SAP_Service8.DS_FT.display_name">DS FT</text>
+      <text key="ino_offers.features.SAP_Service8.DS_FTDR.description">DS FTDR Option</text>
+      <text key="ino_offers.features.SAP_Service8.DS_FTDR.display_name">DS FTDR</text>
+      <text key="ino_offers.features.SAP_Service8.DS_FTHA.description">DS FTHA Option</text>
+      <text key="ino_offers.features.SAP_Service8.DS_FTHA.display_name">DS FTHA</text>
+      <text key="ino_offers.features.SAP_Service8.DS_OF.description">DS OF Option</text>
+      <text key="ino_offers.features.SAP_Service8.DS_OF.display_name">DS OF</text>
+      <text key="ino_offers.features.SAP_Service8.DS_REQUESTOR.display_name">DS Requestor</text>
+      <text key="ino_offers.features.SAP_Service8.DS_SAPS.description">DS SAPS Option</text>
+      <text key="ino_offers.features.SAP_Service8.DS_SAPS.display_name">DS SAPS</text>
+      <text key="ino_offers.features.SAP_Service8.FIREWALL_LARGE.description">FIREWALL (Large) Option</text>
+      <text key="ino_offers.features.SAP_Service8.FIREWALL_LARGE.display_name">FIREWALL (Large)</text>
+      <text key="ino_offers.features.SAP_Service8.FIREWALL_MEDIUM.description">FIREWALL (Medium) Option</text>
+      <text key="ino_offers.features.SAP_Service8.FIREWALL_MEDIUM.display_name">FIREWALL (Medium)</text>
+      <text key="ino_offers.features.SAP_Service8.HANA_SAPS.description">HANA SAPS Option</text>
+      <text key="ino_offers.features.SAP_Service8.HANA_SAPS.display_name">HANA SAPS</text>
+      <text key="ino_offers.features.SAP_Service8.HANA_SPARE.description">HANA Spare Option</text>
+      <text key="ino_offers.features.SAP_Service8.HANA_SPARE.display_name">HANA Spare</text>
+      <text key="ino_offers.features.SAP_Service8.HANA_USAGE.description">HANA Usage Option</text>
+      <text key="ino_offers.features.SAP_Service8.HANA_USAGE.display_name">HANA Usage</text>
+      <text key="ino_offers.features.SAP_Service8.IMPACTED_ENVIRONMENT.display_name">Impacted Environment</text>
+      <text key="ino_offers.features.SAP_Service8.INTERNET_VPN.description">Internet VPN Option</text>
+      <text key="ino_offers.features.SAP_Service8.INTERNET_VPN.display_name">Internet VPN</text>
+      <text key="ino_offers.features.SAP_Service8.MPLS_BACKBONE.description">MPLS Backbone Option</text>
+      <text key="ino_offers.features.SAP_Service8.MPLS_BACKBONE.display_name">MPLS Backbone VPN</text>
+      <text key="ino_offers.features.SAP_Service8.SAP_ABAP.description">SAP ABAP Patches (PER 15 PATCHES)</text>
+      <text key="ino_offers.features.SAP_Service8.SAP_ABAP.display_name">SAP ABAP Patches (PER 15 PATCHES)</text>
+      <text key="ino_offers.features.SAP_Service8.SAP_CLIENT_COPY.description">SAP Client Copy (UP TO 250GB)</text>
+      <text key="ino_offers.features.SAP_Service8.SAP_CLIENT_COPY.display_name">SAP Client Copy (UP TO 250GB)</text>
+      <text key="ino_offers.features.SAP_Service8.SAP_CONSULTANT_DAYS.description">SAP Technical Consultant / Architect local (10+ Years Experience)</text>
+      <text key="ino_offers.features.SAP_Service8.SAP_CONSULTANT_DAYS.display_name">SAP Consultant/Architect number of days</text>
+      <text key="ino_offers.features.SAP_Service8.SAP_DATABASE_UPGRADE.description">SAP Database Upgrade (UP TO 250GB)</text>
+      <text key="ino_offers.features.SAP_Service8.SAP_DATABASE_UPGRADE.display_name">SAP Database Upgrade (UP TO 250GB)</text>
+      <text key="ino_offers.features.SAP_Service8.SAP_ENHANCEMENT.description">SAP Enhancement Pack (UP TO 250GB)</text>
+      <text key="ino_offers.features.SAP_Service8.SAP_ENHANCEMENT.display_name">SAP Enhancement Pack (UP TO 250GB)</text>
+      <text key="ino_offers.features.SAP_Service8.SAP_HANA_CONSULTANT_DAYS.description">SAP Technical Consultant / Architect local with HANA Experience(10+ Years Experience)</text>
+      <text key="ino_offers.features.SAP_Service8.SAP_HANA_CONSULTANT_DAYS.display_name">SAP HANA Consultant / Architect Management number of days</text>
+      <text key="ino_offers.features.SAP_Service8.SAP_HANA_DB_UPGRADE.description">SAP HANA DB Installation/ Upgrade</text>
+      <text key="ino_offers.features.SAP_Service8.SAP_HANA_DB_UPGRADE.display_name">SAP HANA DB Installation/ Upgrade</text>
+      <text key="ino_offers.features.SAP_Service8.SAP_JAVA.description">SAP JAVA Patches (PER 5 PATCHES)</text>
+      <text key="ino_offers.features.SAP_Service8.SAP_JAVA.display_name">SAP JAVA Patches (PER 5 PATCHES)</text>
+      <text key="ino_offers.features.SAP_Service8.SAP_LANG_INSTALL.description">SAP Language Installation (PER 15 PATCHES)</text>
+      <text key="ino_offers.features.SAP_Service8.SAP_LANG_INSTALL.display_name">SAP Language Installation (PER 15 PATCHES)</text>
+      <text key="ino_offers.features.SAP_Service8.SAP_NEARSHORE_CONSULTANT_DAYS.description">SAP Consultant near-shore</text>
+      <text key="ino_offers.features.SAP_Service8.SAP_NEARSHORE_CONSULTANT_DAYS.display_name">SAP Consultant near-shore number of days</text>
+      <text key="ino_offers.features.SAP_Service8.SAP_PRINCE_NEARSHORE_CON_DAYS.description">SAP Principal Consultant near-shore</text>
+      <text key="ino_offers.features.SAP_Service8.SAP_PRINCE_NEARSHORE_CON_DAYS.display_name">SAP Principal Consultant near-shore number of days</text>
+      <text key="ino_offers.features.SAP_Service8.SAP_PROJ_MAN_DAYS.description">SAP Technical Project Management (10+ Years Experience)</text>
+      <text key="ino_offers.features.SAP_Service8.SAP_PROJ_MAN_DAYS.display_name">SAP Project Management number of days</text>
+      <text key="ino_offers.features.SAP_Service8.SAP_RUNDOWN.description">SAP Instance Rundown</text>
+      <text key="ino_offers.features.SAP_Service8.SAP_RUNDOWN.display_name">SAP Instance Rundown</text>
+      <text key="ino_offers.features.SAP_Service8.SAP_SENIOR_NEARSHORE_CON_DAYS.description">SAP Senior Consultant near-shore</text>
+      <text key="ino_offers.features.SAP_Service8.SAP_SENIOR_NEARSHORE_CON_DAYS.display_name">SAP Senior Consultant near-shore number of days</text>
+      <text key="ino_offers.features.SAP_Service8.SAP_STARTUP.description">SAP Instance StartUp / Installation</text>
+      <text key="ino_offers.features.SAP_Service8.SAP_STARTUP.display_name">SAP Instance StartUp / Installation</text>
+      <text key="ino_offers.features.SAP_Service8.SAP_SYSTEM_COPY.description">SAP System Copy (DB copy + System Startup) (UP TO 250GB)</text>
+      <text key="ino_offers.features.SAP_Service8.SAP_SYSTEM_COPY.display_name">SAP System Copy (DB copy + System Startup) (UP TO 250GB)</text>
+      <text key="ino_offers.features.SAP_Service8.SAP_TECH_COORD.description">SAP Technical Coordination</text>
+      <text key="ino_offers.features.SAP_Service8.SAP_TECH_COORD.display_name">SAP Technical Coordination</text>
+      <text key="ino_offers.features.SAP_Service8.SAP_TRANSPORT.description">SAP Transport Implementation (per transport move)</text>
+      <text key="ino_offers.features.SAP_Service8.SAP_TRANSPORT.display_name">SAP Transport Implementation (per transport move)</text>
+      <text key="ino_offers.features.SAP_Service8.SAP_UPGRADE.description">SAP Upgrade (UP TO 250GB)</text>
+      <text key="ino_offers.features.SAP_Service8.SAP_UPGRADE.display_name">SAP Upgrade (UP TO 250GB)</text>
+      <text key="ino_offers.features.SAP_Service8.SPARE_SAPS.description">Spare SAPS Option</text>
+      <text key="ino_offers.features.SAP_Service8.SPARE_SAPS.display_name">Spare SAPS VPN</text>
+      <text key="ino_offers.features.SAP_Service8.TSYSTEM_DESIGN_REP.display_name">T-SYSTEMS Design Responsible</text>
+      <text key="ino_offers.features.SAP_Service8.VLAN_RUNDOWN.description">Hosting/VLAN Rundown</text>
+      <text key="ino_offers.features.SAP_Service8.VLAN_RUNDOWN.display_name">Hosting/VLAN Rundown</text>
+      <text key="ino_offers.features.SAP_Service8.VLAN_STARTUP.description">Hosting/VLAN Start-Up</text>
+      <text key="ino_offers.features.SAP_Service8.VLAN_STARTUP.display_name">Hosting/VLAN Start-Up</text>
+      <text key="ino_offers.offer_categories.BT_COMPUTE_LOCAL_SERVICES.display_name">BT Compute (Value Added Services)</text>
+      <text key="ino_offers.offer_terms_and_conditions.SAP20.terms_and_conditions">SAP20 T&amp;Cs</text>
+      <text key="ino_offers.offers.SAP20.description">SAP</text>
+      <text key="ino_offers.offers.SAP20.invoice_name">SAP20</text>
+      <text key="ino_offers.services.SAP_SYSTEMS1.description">List of SAP Systems</text>
+      <text key="ino_offers.services.SAP_SYSTEMS1.display_name">SAP Systems</text>
+      <text key="ino_offers.services.SAP_Service8.description">SAP Service</text>
+      <text key="ino_offers.services.SAP_Service8.display_name">SAP Service</text>
+    </language>
+  </i18n>
+</offerConfiguration>";
+      var xml = Blockly.Xml.textToDom(xml_text2);
+      Blockly.Xml.domToWorkspace(xml, workspace);
+    }
+  </script>
+
+</body>
+</html>
